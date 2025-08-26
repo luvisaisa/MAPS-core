@@ -1,6 +1,7 @@
 """Core XML parsing functions for medical annotation data."""
 
 import xml.etree.ElementTree as ET
+import re
 from typing import Tuple
 import os
 
@@ -20,6 +21,14 @@ def parse_radiology_sample(file_path: str) -> Tuple[dict, dict]:
     # Load XML file
     tree = ET.parse(file_path)
     root = tree.getroot()
+    
+    # Extract namespace from root tag
+    namespace_match = re.match(r'\{(.*)\}', root.tag)
+    ns_uri = namespace_match.group(1) if namespace_match else ''
+    
+    def tag(name):
+        """Helper to build tag with namespace if present."""
+        return f"{{{ns_uri}}}{name}" if ns_uri else name
     
     # Placeholder for extracted data
     main_data = {}
