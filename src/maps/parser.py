@@ -43,6 +43,20 @@ def parse_radiology_sample(file_path: str) -> Tuple[Dict, Dict]:
         series_uid = header.find(tag('SeriesInstanceUID'))
         if series_uid is not None and series_uid.text:
             header_values['SeriesInstanceUID'] = series_uid.text
+            
+        # Extract modality
+        modality = header.find(tag('Modality'))
+        if modality is not None and modality.text:
+            header_values['Modality'] = modality.text
+            
+        # Extract service date/time
+        date_service = header.find(tag('DateService'))
+        if date_service is not None and date_service.text:
+            header_values['DateService'] = date_service.text
+            
+        time_service = header.find(tag('TimeService'))
+        if time_service is not None and time_service.text:
+            header_values['TimeService'] = time_service.text
     
     # Placeholder for extracted data
     main_data = {'header': header_values}
