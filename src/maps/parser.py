@@ -76,3 +76,30 @@ def parse_radiology_sample(file_path: str) -> Tuple[Dict, Dict]:
     unblinded_data = {}
     
     return main_data, unblinded_data
+
+
+def extract_roi_data(nodule_elem, tag_func):
+    """Extract ROI (Region of Interest) data from a nodule element."""
+    roi_list = []
+    rois = nodule_elem.findall(tag_func('roi'))
+    
+    for roi in rois:
+        roi_data = {}
+        
+        # Extract image SOP UID
+        image_sop = roi.find(tag_func('imageSOP_UID'))
+        if image_sop is not None and image_sop.text:
+            roi_data['imageSOP_UID'] = image_sop.text
+        
+        # Extract coordinates
+        x_coord = roi.find(tag_func('xCoord'))
+        if x_coord is not None and x_coord.text:
+            roi_data['xCoord'] = x_coord.text
+            
+        y_coord = roi.find(tag_func('yCoord'))
+        if y_coord is not None and y_coord.text:
+            roi_data['yCoord'] = y_coord.text
+        
+        roi_list.append(roi_data)
+    
+    return roi_list
