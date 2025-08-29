@@ -103,3 +103,57 @@ def extract_roi_data(nodule_elem, tag_func):
         roi_list.append(roi_data)
     
     return roi_list
+
+
+def extract_characteristics(nodule_elem, tag_func):
+    """Extract nodule characteristic data."""
+    char_data = {}
+    characteristics = nodule_elem.find(tag_func('characteristics'))
+    
+    if characteristics is not None:
+        # Extract subtlety
+        subtlety = characteristics.find(tag_func('subtlety'))
+        if subtlety is not None and subtlety.text:
+            char_data['subtlety'] = subtlety.text
+        
+        # Extract internal structure
+        internal_struct = characteristics.find(tag_func('internalStructure'))
+        if internal_struct is not None and internal_struct.text:
+            char_data['internalStructure'] = internal_struct.text
+        
+        # Extract calcification
+        calcification = characteristics.find(tag_func('calcification'))
+        if calcification is not None and calcification.text:
+            char_data['calcification'] = calcification.text
+        
+        # Extract sphericity
+        sphericity = characteristics.find(tag_func('sphericity'))
+        if sphericity is not None and sphericity.text:
+            char_data['sphericity'] = sphericity.text
+        
+        # Extract margin
+        margin = characteristics.find(tag_func('margin'))
+        if margin is not None and margin.text:
+            char_data['margin'] = margin.text
+        
+        # Extract lobulation
+        lobulation = characteristics.find(tag_func('lobulation'))
+        if lobulation is not None and lobulation.text:
+            char_data['lobulation'] = lobulation.text
+        
+        # Extract spiculation
+        spiculation = characteristics.find(tag_func('spiculation'))
+        if spiculation is not None and spiculation.text:
+            char_data['spiculation'] = spiculation.text
+        
+        # Extract texture
+        texture = characteristics.find(tag_func('texture'))
+        if texture is not None and texture.text:
+            char_data['texture'] = texture.text
+        
+        # Extract malignancy
+        malignancy = characteristics.find(tag_func('malignancy'))
+        if malignancy is not None and malignancy.text:
+            char_data['malignancy'] = malignancy.text
+    
+    return char_data
