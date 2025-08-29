@@ -2,19 +2,20 @@
 
 import xml.etree.ElementTree as ET
 import re
+import pandas as pd
 from typing import Tuple, Dict, List
 import os
 
 
-def parse_radiology_sample(file_path: str) -> Tuple[Dict, Dict]:
+def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Parse a single radiology XML file.
+    Parse a single radiology XML file and return DataFrames.
     
     Args:
         file_path: Path to the XML file
         
     Returns:
-        Tuple of (main_data, unblinded_data) dictionaries
+        Tuple of (main_dataframe, unblinded_dataframe)
     """
     print(f"Parsing XML file: {os.path.basename(file_path)}")
     
@@ -56,26 +57,24 @@ def parse_radiology_sample(file_path: str) -> Tuple[Dict, Dict]:
             header_values['TimeService'] = time_service.text
     
     # Extract nodule data
-    nodules = []
+    records = []
     unblinded_reads = root.findall(tag('unblindedReadNodule'))
     
     for nodule_elem in unblinded_reads:
-        nodule_data = {}
+        record = header_values.copy()
         
         # Extract nodule ID
         nodule_id = nodule_elem.find(tag('noduleID'))
         if nodule_id is not None and nodule_id.text:
-            nodule_data['noduleID'] = nodule_id.text
+            record['noduleID'] = nodule_id.text
         
-        nodules.append(nodule_data)
+        records.append(record)
     
-    main_data = {
-        'header': header_values,
-        'nodules': nodules
-    }
-    unblinded_data = {}
+    # Convert to DataFrame
+    main_df = pd.DataFrame(records)
+    unblinded_df = pd.DataFrame()  # Placeholder for now
     
-    return main_data, unblinded_data
+    return main_df, unblinded_df
 
 
 def extract_roi_data(nodule_elem, tag_func):
@@ -86,12 +85,10 @@ def extract_roi_data(nodule_elem, tag_func):
     for roi in rois:
         roi_data = {}
         
-        # Extract image SOP UID
         image_sop = roi.find(tag_func('imageSOP_UID'))
         if image_sop is not None and image_sop.text:
             roi_data['imageSOP_UID'] = image_sop.text
         
-        # Extract coordinates
         x_coord = roi.find(tag_func('xCoord'))
         if x_coord is not None and x_coord.text:
             roi_data['xCoord'] = x_coord.text
@@ -111,47 +108,38 @@ def extract_characteristics(nodule_elem, tag_func):
     characteristics = nodule_elem.find(tag_func('characteristics'))
     
     if characteristics is not None:
-        # Extract subtlety
         subtlety = characteristics.find(tag_func('subtlety'))
         if subtlety is not None and subtlety.text:
             char_data['subtlety'] = subtlety.text
         
-        # Extract internal structure
         internal_struct = characteristics.find(tag_func('internalStructure'))
         if internal_struct is not None and internal_struct.text:
             char_data['internalStructure'] = internal_struct.text
         
-        # Extract calcification
         calcification = characteristics.find(tag_func('calcification'))
         if calcification is not None and calcification.text:
             char_data['calcification'] = calcification.text
         
-        # Extract sphericity
         sphericity = characteristics.find(tag_func('sphericity'))
         if sphericity is not None and sphericity.text:
             char_data['sphericity'] = sphericity.text
         
-        # Extract margin
         margin = characteristics.find(tag_func('margin'))
         if margin is not None and margin.text:
             char_data['margin'] = margin.text
         
-        # Extract lobulation
         lobulation = characteristics.find(tag_func('lobulation'))
         if lobulation is not None and lobulation.text:
             char_data['lobulation'] = lobulation.text
         
-        # Extract spiculation
         spiculation = characteristics.find(tag_func('spiculation'))
         if spiculation is not None and spiculation.text:
             char_data['spiculation'] = spiculation.text
         
-        # Extract texture
         texture = characteristics.find(tag_func('texture'))
         if texture is not None and texture.text:
             char_data['texture'] = texture.text
         
-        # Extract malignancy
         malignancy = characteristics.find(tag_func('malignancy'))
         if malignancy is not None and malignancy.text:
             char_data['malignancy'] = malignancy.text
