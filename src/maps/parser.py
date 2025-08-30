@@ -145,3 +145,29 @@ def extract_characteristics(nodule_elem, tag_func):
             char_data['malignancy'] = malignancy.text
     
     return char_data
+
+
+def parse_multiple(files: List[str]) -> Tuple[Dict[str, pd.DataFrame], Dict[str, pd.DataFrame]]:
+    """
+    Parse multiple XML files.
+    
+    Args:
+        files: List of file paths to parse
+        
+    Returns:
+        Tuple of (main_dataframes_dict, unblinded_dataframes_dict)
+    """
+    main_dfs = {}
+    unblinded_dfs = {}
+    
+    for file_path in files:
+        try:
+            main_df, unblinded_df = parse_radiology_sample(file_path)
+            file_id = os.path.basename(file_path).split('.')[0]
+            main_dfs[file_id] = main_df
+            unblinded_dfs[file_id] = unblinded_df
+            print(f"✓ Successfully parsed {file_id}")
+        except Exception as e:
+            print(f"✗ Error parsing {file_path}: {e}")
+    
+    return main_dfs, unblinded_dfs
