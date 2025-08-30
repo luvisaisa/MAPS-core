@@ -171,3 +171,26 @@ def parse_multiple(files: List[str]) -> Tuple[Dict[str, pd.DataFrame], Dict[str,
             print(f"✗ Error parsing {file_path}: {e}")
     
     return main_dfs, unblinded_dfs
+
+
+def export_excel(df: pd.DataFrame, output_path: str) -> None:
+    """
+    Export DataFrame to Excel file.
+    
+    Args:
+        df: DataFrame to export
+        output_path: Path to save Excel file
+    """
+    from openpyxl import Workbook
+    from openpyxl.utils.dataframe import dataframe_to_rows
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Radiology Data"
+    
+    # Write DataFrame to worksheet
+    for r in dataframe_to_rows(df, index=False, header=True):
+        ws.append(r)
+    
+    wb.save(output_path)
+    print(f"✓ Exported to {output_path}")
