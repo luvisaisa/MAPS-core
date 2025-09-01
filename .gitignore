@@ -1,0 +1,72 @@
+# Build directories
+build/
+dist/
+*.app/
+*.spec
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Backup files
+*.bak
+*.bak2
+*.bak3
+
+# Virtual environments
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output files
+*.xlsx
+*.db
+*.log
+
+# Example output directories
+examples/output/
+examples/batch_output/
+examples/*.xlsx
+examples/*.db
+
+# Configuration files (keep templates)
+configs/config.json
+
+# AI instruction files (private)
+.github/CLAUDE_CONTEXT.md
+.github/instructions/*.instructions.md
+*CLAUDE*.md
+*claude*.md
+
+# Large binary files
+*.dylib
+*.pkg
+*.pyz
+
+# Test output
+test_output/
+temp_files/
+
+# Node.js dependencies
+node_modules/
+package-lock.json
+# Large binary files
+build/
+dist/
+*.app
+*.pkg
+*.pyz
+*.dylib
+.venv/
