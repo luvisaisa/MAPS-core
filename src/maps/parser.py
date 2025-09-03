@@ -56,7 +56,7 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
         if time_service is not None and time_service.text:
             header_values['TimeService'] = time_service.text
     
-    # Extract nodule data
+    # Extract nodule data with characteristics
     records = []
     unblinded_reads = root.findall(tag('unblindedReadNodule'))
     
@@ -67,6 +67,14 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
         nodule_id = nodule_elem.find(tag('noduleID'))
         if nodule_id is not None and nodule_id.text:
             record['noduleID'] = nodule_id.text
+        
+        # Extract characteristics
+        char_data = extract_characteristics(nodule_elem, tag)
+        record.update(char_data)
+        
+        # Extract ROI data (count of ROIs)
+        rois = extract_roi_data(nodule_elem, tag)
+        record['roi_count'] = len(rois)
         
         records.append(record)
     
