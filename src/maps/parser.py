@@ -202,3 +202,35 @@ def export_excel(df: pd.DataFrame, output_path: str) -> None:
     
     wb.save(output_path)
     print(f"✓ Exported to {output_path}")
+
+
+def extract_reading_sessions(root, tag_func):
+    """
+    Extract reading session data from XML.
+    
+    Args:
+        root: XML root element
+        tag_func: Function to build namespaced tags
+        
+    Returns:
+        List of reading session dictionaries
+    """
+    sessions = []
+    reading_sessions = root.findall(tag_func('readingSession'))
+    
+    for session in reading_sessions:
+        session_data = {}
+        
+        # Extract radiologist ID
+        rad_id = session.find(tag_func('servicingRadiologistID'))
+        if rad_id is not None and rad_id.text:
+            session_data['radiologist_id'] = rad_id.text
+        
+        # Extract annotation version
+        annotation_version = session.find(tag_func('annotationVersion'))
+        if annotation_version is not None and annotation_version.text:
+            session_data['annotation_version'] = annotation_version.text
+        
+        sessions.append(session_data)
+    
+    return sessions
