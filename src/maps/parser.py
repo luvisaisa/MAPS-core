@@ -16,12 +16,22 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
         
     Returns:
         Tuple of (main_dataframe, unblinded_dataframe)
+        
+    Raises:
+        FileNotFoundError: If file does not exist
+        ET.ParseError: If XML is malformed
     """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+    
     print(f"Parsing XML file: {os.path.basename(file_path)}")
     
-    # Load XML file
-    tree = ET.parse(file_path)
-    root = tree.getroot()
+    try:
+        # Load XML file
+        tree = ET.parse(file_path)
+        root = tree.getroot()
+    except ET.ParseError as e:
+        raise ET.ParseError(f"Malformed XML in {file_path}: {e}")
     
     # Extract namespace from root tag
     namespace_match = re.match(r'\{(.*)\}', root.tag)
@@ -79,7 +89,7 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
         records.append(record)
     
     # Convert to DataFrame
-    main_df = pd.DataFrame(records)
+    main_df = pd.DataFrame(records) if records else pd.DataFrame()
     unblinded_df = pd.DataFrame()  # Placeholder for now
     
     return main_df, unblinded_df
@@ -155,6 +165,38 @@ def extract_characteristics(nodule_elem, tag_func):
     return char_data
 
 
+def extract_reading_sessions(root, tag_func):
+    """
+    Extract reading session data from XML.
+    
+    Args:
+        root: XML root element
+        tag_func: Function to build namespaced tags
+        
+    Returns:
+        List of reading session dictionaries
+    """
+    sessions = []
+    reading_sessions = root.findall(tag_func('readingSession'))
+    
+    for session in reading_sessions:
+        session_data = {}
+        
+        # Extract radiologist ID
+        rad_id = session.find(tag_func('servicingRadiologistID'))
+        if rad_id is not None and rad_id.text:
+            session_data['radiologist_id'] = rad_id.text
+        
+        # Extract annotation version
+        annotation_version = session.find(tag_func('annotationVersion'))
+        if annotation_version is not None and annotation_version.text:
+            session_data['annotation_version'] = annotation_version.text
+        
+        sessions.append(session_data)
+    
+    return sessions
+
+
 def parse_multiple(files: List[str]) -> Tuple[Dict[str, pd.DataFrame], Dict[str, pd.DataFrame]]:
     """
     Parse multiple XML files.
@@ -202,35 +244,3 @@ def export_excel(df: pd.DataFrame, output_path: str) -> None:
     
     wb.save(output_path)
     print(f"✓ Exported to {output_path}")
-
-
-def extract_reading_sessions(root, tag_func):
-    """
-    Extract reading session data from XML.
-    
-    Args:
-        root: XML root element
-        tag_func: Function to build namespaced tags
-        
-    Returns:
-        List of reading session dictionaries
-    """
-    sessions = []
-    reading_sessions = root.findall(tag_func('readingSession'))
-    
-    for session in reading_sessions:
-        session_data = {}
-        
-        # Extract radiologist ID
-        rad_id = session.find(tag_func('servicingRadiologistID'))
-        if rad_id is not None and rad_id.text:
-            session_data['radiologist_id'] = rad_id.text
-        
-        # Extract annotation version
-        annotation_version = session.find(tag_func('annotationVersion'))
-        if annotation_version is not None and annotation_version.text:
-            session_data['annotation_version'] = annotation_version.text
-        
-        sessions.append(session_data)
-    
-    return sessions
