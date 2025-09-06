@@ -301,3 +301,70 @@ def detect_parse_case(file_path: str) -> str:
         return "Core_Attributes_Only"
     else:
         return "With_Reason_Partial"
+
+
+def get_expected_attributes_for_case(parse_case: str) -> Dict[str, List[str]]:
+    """
+    Get expected XML attributes for a given parse case.
+    
+    Args:
+        parse_case: Parse case identifier
+        
+    Returns:
+        Dictionary mapping attribute categories to expected field lists
+    """
+    expected_attrs = {
+        "Complete_Attributes": {
+            "header": ["StudyInstanceUID", "SeriesInstanceUID", "Modality", "DateService", "TimeService"],
+            "characteristics": ["subtlety", "internalStructure", "calcification", "sphericity", 
+                              "margin", "lobulation", "spiculation", "texture", "malignancy"],
+            "roi": ["imageSOP_UID", "xCoord", "yCoord"],
+            "nodule": ["noduleID"]
+        },
+        "Core_Attributes_Only": {
+            "header": ["StudyInstanceUID", "SeriesInstanceUID", "DateService"],
+            "characteristics": ["subtlety", "malignancy"],
+            "roi": ["imageSOP_UID", "xCoord", "yCoord"],
+            "nodule": ["noduleID"]
+        },
+        "With_Reason_Partial": {
+            "header": ["StudyInstanceUID", "SeriesInstanceUID"],
+            "characteristics": ["subtlety"],
+            "roi": ["imageSOP_UID"],
+            "nodule": ["noduleID"]
+        },
+        "LIDC_Single_Session": {
+            "header": ["StudyInstanceUID", "SeriesInstanceUID", "DateService", "TimeService"],
+            "characteristics": ["subtlety"],
+            "roi": ["imageSOP_UID", "xCoord", "yCoord"],
+            "nodule": ["noduleID"]
+        },
+        "LIDC_Multi_Session_2": {
+            "header": ["StudyInstanceUID", "SeriesInstanceUID", "DateService", "TimeService"],
+            "characteristics": ["subtlety"],
+            "roi": ["imageSOP_UID", "xCoord", "yCoord"],
+            "nodule": ["noduleID"]
+        },
+        "LIDC_Multi_Session_3": {
+            "header": ["StudyInstanceUID", "SeriesInstanceUID", "DateService", "TimeService"],
+            "characteristics": ["subtlety"],
+            "roi": ["imageSOP_UID", "xCoord", "yCoord"],
+            "nodule": ["noduleID"]
+        },
+        "LIDC_Multi_Session_4": {
+            "header": ["StudyInstanceUID", "SeriesInstanceUID", "DateService", "TimeService"],
+            "characteristics": ["subtlety"],
+            "roi": ["imageSOP_UID", "xCoord", "yCoord"],
+            "nodule": ["noduleID"]
+        }
+    }
+    
+    # Default structure for unknown cases
+    default_expected = {
+        "header": ["StudyInstanceUID", "SeriesInstanceUID"],
+        "characteristics": [],
+        "roi": ["imageSOP_UID"],
+        "nodule": ["noduleID"]
+    }
+    
+    return expected_attrs.get(parse_case, default_expected)
