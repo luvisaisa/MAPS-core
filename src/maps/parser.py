@@ -244,3 +244,60 @@ def export_excel(df: pd.DataFrame, output_path: str) -> None:
     
     wb.save(output_path)
     print(f"✓ Exported to {output_path}")
+
+
+def detect_parse_case(file_path: str) -> str:
+    """
+    Detect the parse case (XML structure type) of a file.
+    
+    Args:
+        file_path: Path to XML file
+        
+    Returns:
+        Parse case identifier string
+    """
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    
+    # Extract namespace
+    namespace_match = re.match(r'\{(.*)\}', root.tag)
+    ns_uri = namespace_match.group(1) if namespace_match else ''
+    
+    def tag(name):
+        return f"{{{ns_uri}}}{name}" if ns_uri else name
+    
+    # Check for LIDC format
+    root_tag = root.tag.split('}')[-1] if '}' in root.tag else root.tag
+    is_lidc = root_tag == 'LidcReadMessage'
+    
+    # Count reading sessions
+    reading_sessions = root.findall(tag('readingSession'))
+    session_count = len(reading_sessions)
+    
+    if is_lidc:
+        if session_count == 1:
+            return "LIDC_Single_Session"
+        elif session_count == 2:
+            return "LIDC_Multi_Session_2"
+        elif session_count == 3:
+            return "LIDC_Multi_Session_3"
+        elif session_count == 4:
+            return "LIDC_Multi_Session_4"
+        else:
+            return f"LIDC_Multi_Session_{session_count}"
+    
+    # Non-LIDC format detection
+    header = root.find(tag('ResponseHeader'))
+    if header is None:
+        return "Unknown"
+    
+    # Check for complete attributes
+    has_modality = header.find(tag('Modality')) is not None
+    has_date = header.find(tag('DateService')) is not None
+    
+    if has_modality and has_date:
+        return "Complete_Attributes"
+    elif has_date:
+        return "Core_Attributes_Only"
+    else:
+        return "With_Reason_Partial"
