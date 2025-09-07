@@ -24,7 +24,13 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
     
-    print(f"Parsing XML file: {os.path.basename(file_path)}")
+    print(f"🔍 Parsing XML file: {os.path.basename(file_path)}")
+    
+    # Detect parse case first
+    parse_case = detect_parse_case(file_path)
+    print(f"  📋 Parse case: {parse_case}")
+    
+    expected_attrs = get_expected_attributes_for_case(parse_case)
     
     try:
         # Load XML file
@@ -46,25 +52,13 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     header = root.find(tag('ResponseHeader'))
     
     if header is not None:
-        study_uid = header.find(tag('StudyInstanceUID'))
-        if study_uid is not None and study_uid.text:
-            header_values['StudyInstanceUID'] = study_uid.text
-            
-        series_uid = header.find(tag('SeriesInstanceUID'))
-        if series_uid is not None and series_uid.text:
-            header_values['SeriesInstanceUID'] = series_uid.text
-            
-        modality = header.find(tag('Modality'))
-        if modality is not None and modality.text:
-            header_values['Modality'] = modality.text
-            
-        date_service = header.find(tag('DateService'))
-        if date_service is not None and date_service.text:
-            header_values['DateService'] = date_service.text
-            
-        time_service = header.find(tag('TimeService'))
-        if time_service is not None and time_service.text:
-            header_values['TimeService'] = time_service.text
+        for field in expected_attrs["header"]:
+            elem = header.find(tag(field))
+            if elem is not None and elem.text:
+                header_values[field] = elem.text
+            else:
+                header_values[field] = "MISSING"
+                print(f"  ⚠️  {field} expected but MISSING")
     
     # Extract nodule data with characteristics
     records = []
@@ -91,6 +85,8 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     # Convert to DataFrame
     main_df = pd.DataFrame(records) if records else pd.DataFrame()
     unblinded_df = pd.DataFrame()  # Placeholder for now
+    
+    print(f"  ✅ Parsed {len(records)} nodule records")
     
     return main_df, unblinded_df
 
@@ -195,55 +191,6 @@ def extract_reading_sessions(root, tag_func):
         sessions.append(session_data)
     
     return sessions
-
-
-def parse_multiple(files: List[str]) -> Tuple[Dict[str, pd.DataFrame], Dict[str, pd.DataFrame]]:
-    """
-    Parse multiple XML files.
-    
-    Args:
-        files: List of file paths to parse
-        
-    Returns:
-        Tuple of (main_dataframes_dict, unblinded_dataframes_dict)
-    """
-    main_dfs = {}
-    unblinded_dfs = {}
-    
-    for file_path in files:
-        try:
-            main_df, unblinded_df = parse_radiology_sample(file_path)
-            file_id = os.path.basename(file_path).split('.')[0]
-            main_dfs[file_id] = main_df
-            unblinded_dfs[file_id] = unblinded_df
-            print(f"✓ Successfully parsed {file_id}")
-        except Exception as e:
-            print(f"✗ Error parsing {file_path}: {e}")
-    
-    return main_dfs, unblinded_dfs
-
-
-def export_excel(df: pd.DataFrame, output_path: str) -> None:
-    """
-    Export DataFrame to Excel file.
-    
-    Args:
-        df: DataFrame to export
-        output_path: Path to save Excel file
-    """
-    from openpyxl import Workbook
-    from openpyxl.utils.dataframe import dataframe_to_rows
-    
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Radiology Data"
-    
-    # Write DataFrame to worksheet
-    for r in dataframe_to_rows(df, index=False, header=True):
-        ws.append(r)
-    
-    wb.save(output_path)
-    print(f"✓ Exported to {output_path}")
 
 
 def detect_parse_case(file_path: str) -> str:
@@ -368,3 +315,52 @@ def get_expected_attributes_for_case(parse_case: str) -> Dict[str, List[str]]:
     }
     
     return expected_attrs.get(parse_case, default_expected)
+
+
+def parse_multiple(files: List[str]) -> Tuple[Dict[str, pd.DataFrame], Dict[str, pd.DataFrame]]:
+    """
+    Parse multiple XML files.
+    
+    Args:
+        files: List of file paths to parse
+        
+    Returns:
+        Tuple of (main_dataframes_dict, unblinded_dataframes_dict)
+    """
+    main_dfs = {}
+    unblinded_dfs = {}
+    
+    for file_path in files:
+        try:
+            main_df, unblinded_df = parse_radiology_sample(file_path)
+            file_id = os.path.basename(file_path).split('.')[0]
+            main_dfs[file_id] = main_df
+            unblinded_dfs[file_id] = unblinded_df
+            print(f"✓ Successfully parsed {file_id}")
+        except Exception as e:
+            print(f"✗ Error parsing {file_path}: {e}")
+    
+    return main_dfs, unblinded_dfs
+
+
+def export_excel(df: pd.DataFrame, output_path: str) -> None:
+    """
+    Export DataFrame to Excel file.
+    
+    Args:
+        df: DataFrame to export
+        output_path: Path to save Excel file
+    """
+    from openpyxl import Workbook
+    from openpyxl.utils.dataframe import dataframe_to_rows
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Radiology Data"
+    
+    # Write DataFrame to worksheet
+    for r in dataframe_to_rows(df, index=False, header=True):
+        ws.append(r)
+    
+    wb.save(output_path)
+    print(f"✓ Exported to {output_path}")
