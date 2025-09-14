@@ -364,3 +364,29 @@ def export_excel(df: pd.DataFrame, output_path: str) -> None:
     
     wb.save(output_path)
     print(f"✓ Exported to {output_path}")
+
+
+def get_parse_statistics(main_dfs: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
+    """
+    Calculate statistics from parsed dataframes.
+    
+    Args:
+        main_dfs: Dictionary of dataframes by file ID
+        
+    Returns:
+        Dictionary containing parse statistics
+    """
+    stats = {
+        'total_files': len(main_dfs),
+        'total_records': sum(len(df) for df in main_dfs.values()),
+        'records_per_file': {},
+        'empty_files': []
+    }
+    
+    for file_id, df in main_dfs.items():
+        record_count = len(df)
+        stats['records_per_file'][file_id] = record_count
+        if record_count == 0:
+            stats['empty_files'].append(file_id)
+    
+    return stats
