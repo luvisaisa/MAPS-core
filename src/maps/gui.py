@@ -43,6 +43,21 @@ class NYTXMLGuiApp:
         
         self.file_label = tk.Label(file_frame, text="No files selected")
         self.file_label.pack(pady=5)
+        
+        # Output folder selection
+        output_frame = tk.Frame(self.root)
+        output_frame.pack(pady=10)
+        
+        output_btn = tk.Button(
+            output_frame,
+            text="Select Output Folder",
+            command=self._select_output_folder,
+            width=20
+        )
+        output_btn.pack()
+        
+        self.output_label = tk.Label(output_frame, text="No output folder selected")
+        self.output_label.pack(pady=5)
     
     def _select_files(self):
         """Open file dialog to select XML files."""
@@ -54,6 +69,14 @@ class NYTXMLGuiApp:
         if files:
             self.selected_files = list(files)
             self.file_label.config(text=f"{len(files)} files selected")
+    
+    def _select_output_folder(self):
+        """Open dialog to select output folder."""
+        folder = filedialog.askdirectory(title="Select Output Folder")
+        
+        if folder:
+            self.output_folder = folder
+            self.output_label.config(text=f"Output: {os.path.basename(folder)}")
     
     def run(self):
         """Start the GUI application."""
