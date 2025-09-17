@@ -3,6 +3,8 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import os
+from .parser import parse_multiple, export_excel
+import pandas as pd
 
 
 class NYTXMLGuiApp:
@@ -58,6 +60,22 @@ class NYTXMLGuiApp:
         
         self.output_label = tk.Label(output_frame, text="No output folder selected")
         self.output_label.pack(pady=5)
+        
+        # Parse button
+        parse_frame = tk.Frame(self.root)
+        parse_frame.pack(pady=20)
+        
+        self.parse_btn = tk.Button(
+            parse_frame,
+            text="Parse Files",
+            command=self._parse_files,
+            width=20,
+            height=2,
+            bg="green",
+            fg="white",
+            font=("Arial", 12, "bold")
+        )
+        self.parse_btn.pack()
     
     def _select_files(self):
         """Open file dialog to select XML files."""
@@ -77,6 +95,38 @@ class NYTXMLGuiApp:
         if folder:
             self.output_folder = folder
             self.output_label.config(text=f"Output: {os.path.basename(folder)}")
+    
+    def _parse_files(self):
+        """Parse selected files and export results."""
+        if not self.selected_files:
+            messagebox.showerror("Error", "Please select XML files to parse")
+            return
+        
+        if not self.output_folder:
+            messagebox.showerror("Error", "Please select an output folder")
+            return
+        
+        try:
+            # Parse files
+            main_dfs, _ = parse_multiple(self.selected_files)
+            
+            # Combine results
+            if main_dfs:
+                combined_df = pd.concat(main_dfs.values(), ignore_index=True)
+                
+                # Export to Excel
+                output_path = os.path.join(self.output_folder, "parsed_results.xlsx")
+                export_excel(combined_df, output_path)
+                
+                messagebox.showinfo(
+                    "Success", 
+                    f"Parsed {len(main_dfs)} files\nSaved to: {output_path}"
+                )
+            else:
+                messagebox.showwarning("Warning", "No data was parsed from the files")
+        
+        except Exception as e:
+            messagebox.showerror("Error", f"Parsing failed: {str(e)}")
     
     def run(self):
         """Start the GUI application."""
