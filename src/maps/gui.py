@@ -14,7 +14,7 @@ class NYTXMLGuiApp:
         """Initialize the GUI application."""
         self.root = tk.Tk()
         self.root.title("MAPS - Medical Annotation Processing System")
-        self.root.geometry("800x600")
+        self.root.geometry("900x700")
         
         self.selected_files = []
         self.output_folder = ""
@@ -76,6 +76,33 @@ class NYTXMLGuiApp:
             font=("Arial", 12, "bold")
         )
         self.parse_btn.pack()
+        
+        # Log area
+        self._create_log_area()
+    
+    def _create_log_area(self):
+        """Create log/status display area."""
+        log_frame = tk.Frame(self.root)
+        log_frame.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+        
+        log_label = tk.Label(log_frame, text="Status Log:", font=("Arial", 10, "bold"))
+        log_label.pack(anchor=tk.W)
+        
+        # Text widget for logs
+        self.log_text = tk.Text(log_frame, height=15, width=90, state=tk.DISABLED)
+        self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        # Scrollbar
+        scrollbar = tk.Scrollbar(log_frame, command=self.log_text.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.log_text.config(yscrollcommand=scrollbar.set)
+    
+    def _log_message(self, message: str):
+        """Add message to log display."""
+        self.log_text.config(state=tk.NORMAL)
+        self.log_text.insert(tk.END, message + "\n")
+        self.log_text.see(tk.END)
+        self.log_text.config(state=tk.DISABLED)
     
     def _select_files(self):
         """Open file dialog to select XML files."""
@@ -87,6 +114,7 @@ class NYTXMLGuiApp:
         if files:
             self.selected_files = list(files)
             self.file_label.config(text=f"{len(files)} files selected")
+            self._log_message(f"Selected {len(files)} XML files")
     
     def _select_output_folder(self):
         """Open dialog to select output folder."""
@@ -95,6 +123,7 @@ class NYTXMLGuiApp:
         if folder:
             self.output_folder = folder
             self.output_label.config(text=f"Output: {os.path.basename(folder)}")
+            self._log_message(f"Output folder: {folder}")
     
     def _parse_files(self):
         """Parse selected files and export results."""
@@ -107,6 +136,8 @@ class NYTXMLGuiApp:
             return
         
         try:
+            self._log_message("Starting parse operation...")
+            
             # Parse files
             main_dfs, _ = parse_multiple(self.selected_files)
             
@@ -118,15 +149,21 @@ class NYTXMLGuiApp:
                 output_path = os.path.join(self.output_folder, "parsed_results.xlsx")
                 export_excel(combined_df, output_path)
                 
+                self._log_message(f"Successfully parsed {len(main_dfs)} files")
+                self._log_message(f"Exported {len(combined_df)} records to {output_path}")
+                
                 messagebox.showinfo(
                     "Success", 
                     f"Parsed {len(main_dfs)} files\nSaved to: {output_path}"
                 )
             else:
+                self._log_message("Warning: No data was parsed from the files")
                 messagebox.showwarning("Warning", "No data was parsed from the files")
         
         except Exception as e:
-            messagebox.showerror("Error", f"Parsing failed: {str(e)}")
+            error_msg = f"Parsing failed: {str(e)}"
+            self._log_message(f"ERROR: {error_msg}")
+            messagebox.showerror("Error", error_msg)
     
     def run(self):
         """Start the GUI application."""
