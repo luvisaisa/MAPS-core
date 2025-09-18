@@ -1,7 +1,7 @@
 """Tkinter GUI application for MAPS."""
 
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 import os
 from .parser import parse_multiple, export_excel
 import pandas as pd
@@ -14,7 +14,7 @@ class NYTXMLGuiApp:
         """Initialize the GUI application."""
         self.root = tk.Tk()
         self.root.title("MAPS - Medical Annotation Processing System")
-        self.root.geometry("900x700")
+        self.root.geometry("900x750")
         
         self.selected_files = []
         self.output_folder = ""
@@ -61,6 +61,21 @@ class NYTXMLGuiApp:
         self.output_label = tk.Label(output_frame, text="No output folder selected")
         self.output_label.pack(pady=5)
         
+        # Progress bar
+        progress_frame = tk.Frame(self.root)
+        progress_frame.pack(pady=10, padx=20, fill=tk.X)
+        
+        self.progress_var = tk.DoubleVar()
+        self.progress_bar = ttk.Progressbar(
+            progress_frame, 
+            variable=self.progress_var, 
+            maximum=100
+        )
+        self.progress_bar.pack(fill=tk.X)
+        
+        self.progress_label = tk.Label(progress_frame, text="Ready")
+        self.progress_label.pack()
+        
         # Parse button
         parse_frame = tk.Frame(self.root)
         parse_frame.pack(pady=20)
@@ -104,6 +119,13 @@ class NYTXMLGuiApp:
         self.log_text.see(tk.END)
         self.log_text.config(state=tk.DISABLED)
     
+    def _update_progress(self, value: float, message: str = ""):
+        """Update progress bar and label."""
+        self.progress_var.set(value)
+        if message:
+            self.progress_label.config(text=message)
+        self.root.update_idletasks()
+    
     def _select_files(self):
         """Open file dialog to select XML files."""
         files = filedialog.askopenfilenames(
@@ -137,17 +159,24 @@ class NYTXMLGuiApp:
         
         try:
             self._log_message("Starting parse operation...")
+            self._update_progress(10, "Parsing XML files...")
             
             # Parse files
             main_dfs, _ = parse_multiple(self.selected_files)
+            
+            self._update_progress(70, "Combining results...")
             
             # Combine results
             if main_dfs:
                 combined_df = pd.concat(main_dfs.values(), ignore_index=True)
                 
+                self._update_progress(85, "Exporting to Excel...")
+                
                 # Export to Excel
                 output_path = os.path.join(self.output_folder, "parsed_results.xlsx")
                 export_excel(combined_df, output_path)
+                
+                self._update_progress(100, "Complete!")
                 
                 self._log_message(f"Successfully parsed {len(main_dfs)} files")
                 self._log_message(f"Exported {len(combined_df)} records to {output_path}")
@@ -157,10 +186,12 @@ class NYTXMLGuiApp:
                     f"Parsed {len(main_dfs)} files\nSaved to: {output_path}"
                 )
             else:
+                self._update_progress(0, "Failed")
                 self._log_message("Warning: No data was parsed from the files")
                 messagebox.showwarning("Warning", "No data was parsed from the files")
         
         except Exception as e:
+            self._update_progress(0, "Error")
             error_msg = f"Parsing failed: {str(e)}"
             self._log_message(f"ERROR: {error_msg}")
             messagebox.showerror("Error", error_msg)
