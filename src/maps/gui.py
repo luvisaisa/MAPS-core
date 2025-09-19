@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import os
+from glob import glob
 from .parser import parse_multiple, export_excel
 import pandas as pd
 
@@ -18,6 +19,7 @@ class NYTXMLGuiApp:
         
         self.selected_files = []
         self.output_folder = ""
+        self.batch_mode = tk.StringVar(value="files")
         
         self._create_widgets()
     
@@ -31,15 +33,33 @@ class NYTXMLGuiApp:
         )
         title_label.pack(pady=20)
         
-        # File selection frame
+        # Mode selection
+        mode_frame = tk.Frame(self.root)
+        mode_frame.pack(pady=5)
+        
+        tk.Radiobutton(
+            mode_frame, 
+            text="Select Files", 
+            variable=self.batch_mode, 
+            value="files"
+        ).pack(side=tk.LEFT, padx=5)
+        
+        tk.Radiobutton(
+            mode_frame, 
+            text="Select Folder", 
+            variable=self.batch_mode, 
+            value="folder"
+        ).pack(side=tk.LEFT, padx=5)
+        
+        # File/Folder selection frame
         file_frame = tk.Frame(self.root)
         file_frame.pack(pady=10)
         
         select_btn = tk.Button(
             file_frame,
-            text="Select XML Files",
-            command=self._select_files,
-            width=20
+            text="Select XML Files/Folder",
+            command=self._select_input,
+            width=25
         )
         select_btn.pack()
         
@@ -54,7 +74,7 @@ class NYTXMLGuiApp:
             output_frame,
             text="Select Output Folder",
             command=self._select_output_folder,
-            width=20
+            width=25
         )
         output_btn.pack()
         
@@ -126,17 +146,24 @@ class NYTXMLGuiApp:
             self.progress_label.config(text=message)
         self.root.update_idletasks()
     
-    def _select_files(self):
-        """Open file dialog to select XML files."""
-        files = filedialog.askopenfilenames(
-            title="Select XML Files",
-            filetypes=[("XML files", "*.xml"), ("All files", "*.*")]
-        )
-        
-        if files:
-            self.selected_files = list(files)
-            self.file_label.config(text=f"{len(files)} files selected")
-            self._log_message(f"Selected {len(files)} XML files")
+    def _select_input(self):
+        """Select files or folder based on mode."""
+        if self.batch_mode.get() == "files":
+            files = filedialog.askopenfilenames(
+                title="Select XML Files",
+                filetypes=[("XML files", "*.xml"), ("All files", "*.*")]
+            )
+            if files:
+                self.selected_files = list(files)
+                self.file_label.config(text=f"{len(files)} files selected")
+                self._log_message(f"Selected {len(files)} XML files")
+        else:
+            folder = filedialog.askdirectory(title="Select Folder with XML Files")
+            if folder:
+                xml_files = glob(os.path.join(folder, "**/*.xml"), recursive=True)
+                self.selected_files = xml_files
+                self.file_label.config(text=f"{len(xml_files)} files in folder")
+                self._log_message(f"Found {len(xml_files)} XML files in folder")
     
     def _select_output_folder(self):
         """Open dialog to select output folder."""
