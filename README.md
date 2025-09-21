@@ -1,6 +1,6 @@
 # MAPS - Medical Annotation Processing System
 
-XML parser for medical imaging annotation data with automatic schema detection.
+XML parser for medical imaging annotation data with GUI and CLI interfaces.
 
 ## Features
 
@@ -10,6 +10,8 @@ XML parser for medical imaging annotation data with automatic schema detection.
 - ROI coordinate mapping
 - Excel export
 - Batch processing
+- **GUI Application** (Tkinter-based)
+- Command-line interface
 
 ## Installation
 
@@ -19,12 +21,24 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Basic Parsing
+### GUI Application
+
+```bash
+python scripts/launch_gui.py
+```
+
+Features:
+- File/folder selection
+- Progress tracking
+- Real-time logging
+- One-click parsing and export
+
+### CLI (Programmatic)
 
 ```python
 from src.maps.parser import parse_radiology_sample
 
-# Parse single file (automatic format detection)
+# Parse single file
 main_df, unblinded_df = parse_radiology_sample('data/sample.xml')
 ```
 
@@ -33,20 +47,8 @@ main_df, unblinded_df = parse_radiology_sample('data/sample.xml')
 ```python
 from src.maps.parser import parse_multiple
 
-# Parse multiple files
-xml_files = ['file1.xml', 'file2.xml', 'file3.xml']
+xml_files = ['file1.xml', 'file2.xml']
 main_dfs, unblinded_dfs = parse_multiple(xml_files)
-```
-
-### Parse Case Detection
-
-```python
-from src.maps.parser import detect_parse_case
-
-# Detect XML format
-case = detect_parse_case('data/sample.xml')
-print(f"Format: {case}")
-# Output: Complete_Attributes, LIDC_Multi_Session_4, etc.
 ```
 
 ## Supported Parse Cases
@@ -59,6 +61,8 @@ print(f"Format: {case}")
 
 See [docs/PARSE_CASES.md](docs/PARSE_CASES.md) for details.
 
-## Examples
+## Documentation
 
-See `examples/` directory for usage examples.
+- [GUI Guide](docs/GUI_GUIDE.md)
+- [Parse Cases](docs/PARSE_CASES.md)
+- [Examples](examples/)
