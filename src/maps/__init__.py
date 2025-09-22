@@ -3,7 +3,7 @@
 Core functionality for parsing medical imaging XML annotation data.
 """
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 from .parser import (
     parse_radiology_sample,
@@ -18,6 +18,7 @@ from .parser import (
 )
 
 from .structure_detector import analyze_xml_structure
+from .gui import NYTXMLGuiApp
 
 __all__ = [
     'parse_radiology_sample',
@@ -29,5 +30,6 @@ __all__ = [
     'extract_characteristics',
     'extract_reading_sessions',
     'get_parse_statistics',
-    'analyze_xml_structure'
+    'analyze_xml_structure',
+    'NYTXMLGuiApp'
 ]
