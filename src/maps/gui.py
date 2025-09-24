@@ -231,3 +231,10 @@ class NYTXMLGuiApp:
 if __name__ == "__main__":
     app = NYTXMLGuiApp()
     app.run()
+
+    def _clear_log(self):
+        """Clear the log display."""
+        self.log_text.config(state=tk.NORMAL)
+        self.log_text.delete(1.0, tk.END)
+        self.log_text.config(state=tk.DISABLED)
+        self._log_message("Log cleared")
