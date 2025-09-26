@@ -1,0 +1,241 @@
+"""
+Canonical Schema Definitions for MAPS Schema-Agnostic Data Ingestion System
+
+This module defines the flexible canonical schema using Pydantic v2 models.
+All source formats (XML, JSON, CSV, PDF, etc.) are normalized into this schema.
+
+Version: 1.0.0
+Python: 3.9+
+Dependencies: pydantic>=2.0
+"""
+
+from __future__ import annotations
+
+from datetime import datetime, date as dt_date
+from typing import Optional, Dict, Any, List, Union, Annotated
+from decimal import Decimal
+from enum import Enum
+from pydantic import (
+    BaseModel,
+    Field,
+    ConfigDict,
+    field_validator,
+    model_validator
+)
+
+
+# =====================================================================
+# ENUMS AND CONSTANTS
+# =====================================================================
+
+class DocumentType(str, Enum):
+    """Standard document types supported by the system"""
+    RADIOLOGY_REPORT = "radiology_report"
+    INVOICE = "invoice"
+    MEDICAL_RECORD = "medical_record"
+    RESEARCH_DATA = "research_data"
+    FORM = "form"
+    CONTRACT = "contract"
+    EMAIL = "email"
+    OTHER = "other"
+
+
+class EntityType(str, Enum):
+    """Types of entities that can be extracted"""
+    DATE = "date"
+    PERSON = "person"
+    ORGANIZATION = "organization"
+    LOCATION = "location"
+    MONEY = "money"
+    PERCENTAGE = "percentage"
+    MEASUREMENT = "measurement"
+    IDENTIFIER = "identifier"
+    MEDICAL_TERM = "medical_term"
+
+
+class ConfidenceLevel(str, Enum):
+    """Confidence levels for extraction quality"""
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+    UNKNOWN = "unknown"
+
+
+# =====================================================================
+# CORE CANONICAL SCHEMA
+# =====================================================================
+
+class DocumentMetadata(BaseModel):
+    """Standard metadata fields present in most documents"""
+    model_config = ConfigDict(extra='allow')
+
+    document_type: Optional[str] = Field(
+        default=None,
+        description="Type of document (radiology_report, invoice, etc.)"
+    )
+    title: Optional[str] = Field(
+        default=None,
+        description="Document title or subject"
+    )
+    date: Annotated[
+        Union[dt_date, datetime, str, None],
+        Field(default=None, description="Primary document date (creation, service, etc.)")
+    ]
+    author: Optional[str] = Field(
+        default=None,
+        description="Document creator or author"
+    )
+    creator: Optional[str] = Field(
+        default=None,
+        description="System or person that created the document"
+    )
+    description: Optional[str] = Field(
+        default=None,
+        description="Brief description or summary"
+    )
+    subject: Optional[str] = Field(
+        default=None,
+        description="Subject matter or topic"
+    )
+    keywords: Optional[List[str]] = Field(
+        default_factory=list,
+        description="Keywords or tags"
+    )
+    language: Optional[str] = Field(
+        default="en",
+        description="Document language (ISO 639-1 code)"
+    )
+
+    # Identification
+    document_id: Optional[str] = Field(
+        default=None,
+        description="Original document identifier from source system"
+    )
+    version: Optional[str] = Field(
+        default=None,
+        description="Document version"
+    )
+
+    # Time tracking
+    created_date: Optional[Union[dt_date, datetime, str]] = Field(default=None)
+    modified_date: Optional[Union[dt_date, datetime, str]] = Field(default=None)
+
+    @field_validator('date', 'created_date', 'modified_date', mode='before')
+    @classmethod
+    def parse_dates(cls, v):
+        """Accept dates as strings, date objects, or datetime objects"""
+        if v is None:
+            return None
+        if isinstance(v, (dt_date, datetime)):
+            return v
+        return v
+
+
+class ExtractionMetadata(BaseModel):
+    """Metadata about the extraction process itself"""
+    model_config = ConfigDict(extra='allow')
+
+    extraction_timestamp: datetime = Field(
+        default_factory=datetime.utcnow,
+        description="When the extraction occurred"
+    )
+    profile_id: Optional[str] = Field(
+        default=None,
+        description="UUID of the profile used for extraction"
+    )
+    profile_name: Optional[str] = Field(
+        default=None,
+        description="Name of the profile used"
+    )
+    parser_version: Optional[str] = Field(
+        default=None,
+        description="Version of the parser used"
+    )
+
+    # Quality metrics
+    confidence_scores: Dict[str, Decimal] = Field(
+        default_factory=dict,
+        description="Per-field confidence scores"
+    )
+    overall_confidence: Optional[Decimal] = Field(
+        default=None,
+        ge=0,
+        le=1,
+        description="Overall extraction confidence"
+    )
+
+    # Missing data tracking
+    unmapped_fields: List[str] = Field(
+        default_factory=list,
+        description="Source fields that couldn't be mapped"
+    )
+    missing_required_fields: List[str] = Field(
+        default_factory=list,
+        description="Required canonical fields that are missing"
+    )
+
+    # Warnings and errors
+    warnings: List[str] = Field(
+        default_factory=list,
+        description="Non-fatal warnings during extraction"
+    )
+    validation_errors: List[str] = Field(
+        default_factory=list,
+        description="Validation errors encountered"
+    )
+
+    # Processing metrics
+    processing_time_ms: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="Time taken to process in milliseconds"
+    )
+
+
+class CanonicalDocument(BaseModel):
+    """
+    The main canonical schema for normalized document data.
+
+    This is the target schema that all source formats are mapped to.
+    Designed to be flexible enough to handle various document types
+    while maintaining structure for common patterns.
+    """
+    model_config = ConfigDict(extra='allow')
+
+    canonical_version: str = Field(
+        default="1.0",
+        description="Version of the canonical schema"
+    )
+
+    document_metadata: DocumentMetadata = Field(
+        ...,
+        description="Standard document metadata fields"
+    )
+
+    fields: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Format-specific fields that don't fit standard metadata"
+    )
+
+    extraction_metadata: ExtractionMetadata = Field(
+        default_factory=ExtractionMetadata,
+        description="Metadata about the extraction process"
+    )
+
+
+# =====================================================================
+# UTILITY FUNCTIONS
+# =====================================================================
+
+def canonical_to_dict(doc: CanonicalDocument, exclude_none: bool = True) -> Dict[str, Any]:
+    """Convert a canonical document to a dictionary suitable for JSON storage"""
+    return doc.model_dump(
+        mode='json',
+        exclude_none=exclude_none,
+        by_alias=True
+    )
+
+
+def dict_to_canonical(data: Dict[str, Any], doc_class=CanonicalDocument) -> CanonicalDocument:
+    """Convert a dictionary to a canonical document"""
+    return doc_class.model_validate(data)
