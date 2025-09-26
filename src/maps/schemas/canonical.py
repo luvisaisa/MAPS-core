@@ -192,6 +192,76 @@ class ExtractionMetadata(BaseModel):
     )
 
 
+class Entity(BaseModel):
+    """Represents an extracted entity (person, date, organization, etc.)"""
+    model_config = ConfigDict(extra='allow')
+
+    entity_type: EntityType = Field(
+        ...,
+        description="Type of entity extracted"
+    )
+    value: str = Field(
+        ...,
+        description="The extracted text value"
+    )
+    normalized_value: Optional[str] = Field(
+        default=None,
+        description="Normalized or standardized form of the value"
+    )
+    confidence: Optional[Decimal] = Field(
+        default=None,
+        ge=0,
+        le=1,
+        description="Confidence score (0-1)"
+    )
+    source_field: Optional[str] = Field(
+        default=None,
+        description="Field from which this entity was extracted"
+    )
+    metadata: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Additional entity-specific metadata"
+    )
+
+
+class ExtractedEntities(BaseModel):
+    """Container for all extracted entities from a document"""
+    model_config = ConfigDict(extra='allow')
+
+    dates: List[Entity] = Field(
+        default_factory=list,
+        description="Extracted dates"
+    )
+    people: List[Entity] = Field(
+        default_factory=list,
+        description="Extracted person names"
+    )
+    organizations: List[Entity] = Field(
+        default_factory=list,
+        description="Extracted organization names"
+    )
+    locations: List[Entity] = Field(
+        default_factory=list,
+        description="Extracted locations"
+    )
+    amounts: List[Entity] = Field(
+        default_factory=list,
+        description="Extracted monetary amounts or measurements"
+    )
+    identifiers: List[Entity] = Field(
+        default_factory=list,
+        description="Extracted IDs, codes, or reference numbers"
+    )
+    medical_terms: List[Entity] = Field(
+        default_factory=list,
+        description="Extracted medical terminology (for radiology/medical docs)"
+    )
+    other: List[Entity] = Field(
+        default_factory=list,
+        description="Other extracted entities"
+    )
+
+
 class CanonicalDocument(BaseModel):
     """
     The main canonical schema for normalized document data.
@@ -217,10 +287,43 @@ class CanonicalDocument(BaseModel):
         description="Format-specific fields that don't fit standard metadata"
     )
 
+    entities: ExtractedEntities = Field(
+        default_factory=ExtractedEntities,
+        description="Entities extracted from the document"
+    )
+
     extraction_metadata: ExtractionMetadata = Field(
         default_factory=ExtractionMetadata,
         description="Metadata about the extraction process"
     )
+
+    @model_validator(mode='after')
+    def validate_document(self):
+        """Perform cross-field validation"""
+        has_metadata = bool(getattr(self.document_metadata, 'title', None) or
+                           getattr(self.document_metadata, 'document_type', None) or
+                           getattr(self.document_metadata, 'date', None))
+        has_fields = bool(getattr(self, 'fields', None))
+        has_entities = any([
+            getattr(self.entities, 'dates', []),
+            getattr(self.entities, 'people', []),
+            getattr(self.entities, 'organizations', []),
+            getattr(self.entities, 'amounts', [])
+        ])
+
+        if not hasattr(self.extraction_metadata, 'warnings') or getattr(self.extraction_metadata, 'warnings', None) is None:
+            self.extraction_metadata.warnings = []
+
+        try:
+            warnings_list = self.extraction_metadata.warnings
+        except AttributeError:
+            warnings_list = getattr(self.extraction_metadata, 'warnings', [])
+            self.extraction_metadata.warnings = warnings_list
+
+        if not (has_metadata or has_fields or has_entities):
+            warnings_list.append("Document appears to have no extractable content")
+
+        return self
 
 
 # =====================================================================
