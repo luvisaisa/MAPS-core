@@ -327,6 +327,123 @@ class CanonicalDocument(BaseModel):
 
 
 # =====================================================================
+# DOMAIN-SPECIFIC CANONICAL SCHEMAS
+# =====================================================================
+
+class RadiologyCanonicalDocument(CanonicalDocument):
+    """
+    Specialized canonical schema for radiology documents (LIDC-IDRI, etc.)
+
+    Extends the base CanonicalDocument with radiology-specific fields
+    while maintaining compatibility with the generic schema.
+    """
+
+    study_instance_uid: Optional[str] = Field(
+        default=None,
+        description="DICOM Study Instance UID"
+    )
+    series_instance_uid: Optional[str] = Field(
+        default=None,
+        description="DICOM Series Instance UID"
+    )
+    modality: Optional[str] = Field(
+        default=None,
+        description="Imaging modality (CT, MRI, etc.)"
+    )
+
+    nodules: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="Detected nodules with annotations"
+    )
+    radiologist_readings: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="Radiologist readings and annotations"
+    )
+
+    @field_validator('document_metadata', mode='before')
+    @classmethod
+    def set_radiology_type(cls, v):
+        """Automatically set document_type to radiology_report"""
+        if isinstance(v, dict):
+            v.setdefault('document_type', 'radiology_report')
+        elif isinstance(v, DocumentMetadata) and v.document_type is None:
+            v.document_type = 'radiology_report'
+        return v
+
+
+class InvoiceCanonicalDocument(CanonicalDocument):
+    """
+    Specialized canonical schema for invoices.
+
+    Example of how to extend for other document types.
+    """
+
+    invoice_number: Optional[str] = None
+    invoice_date: Annotated[Union[dt_date, str, None], Field(default=None)]
+    due_date: Annotated[Union[dt_date, str, None], Field(default=None)]
+    total_amount: Optional[Decimal] = None
+    currency: Optional[str] = "USD"
+
+    vendor: Optional[Dict[str, str]] = Field(
+        default_factory=dict,
+        description="Vendor/seller information"
+    )
+    customer: Optional[Dict[str, str]] = Field(
+        default_factory=dict,
+        description="Customer/buyer information"
+    )
+    line_items: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="Invoice line items"
+    )
+
+    @field_validator('document_metadata', mode='before')
+    @classmethod
+    def set_invoice_type(cls, v):
+        """Automatically set document_type to invoice"""
+        if isinstance(v, dict):
+            v.setdefault('document_type', 'invoice')
+        elif isinstance(v, DocumentMetadata) and v.document_type is None:
+            v.document_type = 'invoice'
+        return v
+
+
+# =====================================================================
+# VALIDATION RESULT MODEL
+# =====================================================================
+
+class ValidationResult(BaseModel):
+    """Result of validating a canonical document against a profile's rules"""
+
+    is_valid: bool = Field(
+        ...,
+        description="Whether the document passed all validation rules"
+    )
+    errors: List[str] = Field(
+        default_factory=list,
+        description="List of validation errors"
+    )
+    warnings: List[str] = Field(
+        default_factory=list,
+        description="List of validation warnings"
+    )
+    missing_required_fields: List[str] = Field(
+        default_factory=list,
+        description="Required fields that are missing"
+    )
+    invalid_values: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Map of field -> error message for invalid values"
+    )
+    confidence_score: Optional[Decimal] = Field(
+        default=None,
+        ge=0,
+        le=1,
+        description="Overall validation confidence score"
+    )
+
+
+# =====================================================================
 # UTILITY FUNCTIONS
 # =====================================================================
 
@@ -342,3 +459,31 @@ def canonical_to_dict(doc: CanonicalDocument, exclude_none: bool = True) -> Dict
 def dict_to_canonical(data: Dict[str, Any], doc_class=CanonicalDocument) -> CanonicalDocument:
     """Convert a dictionary to a canonical document"""
     return doc_class.model_validate(data)
+
+
+def merge_canonical_documents(base: CanonicalDocument, update: CanonicalDocument) -> CanonicalDocument:
+    """
+    Merge two canonical documents, with update taking precedence.
+
+    Useful for incremental parsing or combining multiple sources.
+    """
+    base_dict = canonical_to_dict(base, exclude_none=False)
+    update_dict = canonical_to_dict(update, exclude_none=True)
+
+    # Deep merge fields
+    if 'fields' in update_dict:
+        base_dict.setdefault('fields', {}).update(update_dict['fields'])
+
+    # Merge entities (append lists)
+    if 'entities' in update_dict:
+        for entity_type in ['dates', 'people', 'organizations', 'amounts']:
+            base_dict['entities'].setdefault(entity_type, []).extend(
+                update_dict['entities'].get(entity_type, [])
+            )
+
+    # Update metadata
+    for key, value in update_dict.get('document_metadata', {}).items():
+        if value is not None:
+            base_dict['document_metadata'][key] = value
+
+    return dict_to_canonical(base_dict, type(base))
