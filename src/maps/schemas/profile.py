@@ -169,6 +169,140 @@ class FieldMapping(BaseModel):
 
 
 # =====================================================================
+# VALIDATION RULES MODELS
+# =====================================================================
+
+class ValidationRule(BaseModel):
+    """Single validation rule for a field"""
+    model_config = ConfigDict(extra='allow')
+
+    field: str = Field(
+        ...,
+        description="Field path to validate"
+    )
+    rule_type: str = Field(
+        ...,
+        description="Type of validation: required, format, range, regex, custom"
+    )
+    parameters: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Parameters for the validation rule"
+    )
+    error_message: Optional[str] = Field(
+        None,
+        description="Custom error message if validation fails"
+    )
+    severity: str = Field(
+        default="error",
+        description="Severity level: error, warning, info"
+    )
+
+
+class ValidationRules(BaseModel):
+    """Collection of validation rules for a profile"""
+    model_config = ConfigDict(extra='allow')
+
+    required_fields: List[str] = Field(
+        default_factory=list,
+        description="List of required canonical schema field paths"
+    )
+    custom_validators: List[ValidationRule] = Field(
+        default_factory=list,
+        description="Custom validation rules"
+    )
+    allow_extra_fields: bool = Field(
+        default=True,
+        description="Whether to allow fields not defined in mappings"
+    )
+    strict_types: bool = Field(
+        default=False,
+        description="Whether to enforce strict type checking"
+    )
+
+
+# =====================================================================
+# MAIN PROFILE MODEL
+# =====================================================================
+
+class Profile(BaseModel):
+    """
+    Complete profile definition for mapping a source format to canonical schema.
+
+    This is the main configuration object that drives the parsing and normalization process.
+    """
+    model_config = ConfigDict(extra='allow')
+
+    profile_id: Optional[str] = Field(
+        None,
+        description="UUID of the profile (assigned by system)"
+    )
+    profile_name: str = Field(
+        ...,
+        description="Unique name for the profile"
+    )
+
+    file_type: FileType = Field(
+        ...,
+        description="Type of file this profile handles"
+    )
+    source_format_description: Optional[str] = Field(
+        None,
+        description="Description of the source format (e.g., 'LIDC-IDRI XML v3.2')"
+    )
+
+    canonical_schema_version: str = Field(
+        default="1.0",
+        description="Version of canonical schema this profile targets"
+    )
+    target_document_type: Optional[str] = Field(
+        None,
+        description="Specific canonical document type (e.g., 'RadiologyCanonicalDocument')"
+    )
+
+    mappings: List[FieldMapping] = Field(
+        ...,
+        description="List of field mappings from source to canonical schema"
+    )
+
+    validation_rules: ValidationRules = Field(
+        default_factory=ValidationRules,
+        description="Validation rules for the canonical output"
+    )
+
+    description: Optional[str] = Field(
+        None,
+        description="Human-readable description of what this profile does"
+    )
+    version: str = Field(
+        default="1.0.0",
+        description="Version of this profile"
+    )
+    is_active: bool = Field(
+        default=True,
+        description="Whether this profile is currently active"
+    )
+    is_default: bool = Field(
+        default=False,
+        description="Whether this is the default profile for its file type"
+    )
+
+    parent_profile_id: Optional[str] = Field(
+        None,
+        description="ID of parent profile to inherit from"
+    )
+
+    created_by: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+    last_used_at: Optional[str] = None
+
+    custom_parser_config: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Format-specific parser configuration"
+    )
+
+
+# =====================================================================
 # UTILITY FUNCTIONS
 # =====================================================================
 
@@ -183,5 +317,4 @@ def profile_to_dict(profile, exclude_none: bool = True) -> Dict[str, Any]:
 
 def dict_to_profile(data: Dict[str, Any]):
     """Convert a dictionary to a Profile"""
-    from .profile import Profile
     return Profile.model_validate(data)
