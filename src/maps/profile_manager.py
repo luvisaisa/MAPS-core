@@ -236,6 +236,115 @@ class ProfileManager:
         """Delete a profile from database"""
         return False
 
+    def validate_profile(self, profile: Profile) -> tuple[bool, List[str]]:
+        """
+        Validate a profile's schema and configuration.
+
+        Args:
+            profile: Profile to validate
+
+        Returns:
+            Tuple of (is_valid, list_of_errors)
+        """
+        errors = []
+
+        if not profile.profile_name:
+            errors.append("Profile name is required")
+
+        if not profile.file_type:
+            errors.append("File type is required")
+
+        if not profile.mappings or len(profile.mappings) == 0:
+            errors.append("Profile must have at least one field mapping")
+
+        target_paths = set()
+        for i, mapping in enumerate(profile.mappings):
+            if not mapping.source_path:
+                errors.append(f"Mapping {i}: source_path is required")
+
+            if not mapping.target_path:
+                errors.append(f"Mapping {i}: target_path is required")
+
+            if mapping.target_path in target_paths:
+                errors.append(f"Duplicate target_path: {mapping.target_path}")
+            target_paths.add(mapping.target_path)
+
+        for required_field in profile.validation_rules.required_fields:
+            if required_field not in target_paths:
+                errors.append(
+                    f"Required field '{required_field}' is not mapped in profile"
+                )
+
+        if profile.parent_profile_id:
+            parent = self.load_profile(profile.parent_profile_id)
+            if parent and parent.parent_profile_id == profile.profile_id:
+                errors.append("Circular profile inheritance detected")
+
+        is_valid = len(errors) == 0
+        return is_valid, errors
+
+    def resolve_profile_with_inheritance(self, profile: Profile) -> Profile:
+        """
+        Resolve a profile by merging with its parent profile.
+
+        Args:
+            profile: Profile with potential parent
+
+        Returns:
+            Resolved Profile with inherited mappings
+        """
+        if not profile.parent_profile_id:
+            return profile
+
+        parent = self.load_profile(profile.parent_profile_id)
+        if not parent:
+            print(f"Parent profile {profile.parent_profile_id} not found")
+            return profile
+
+        parent = self.resolve_profile_with_inheritance(parent)
+
+        merged_mappings = {m.source_path: m for m in parent.mappings}
+        for mapping in profile.mappings:
+            merged_mappings[mapping.source_path] = mapping
+
+        profile.mappings = list(merged_mappings.values())
+
+        return profile
+
+    def export_profile(self, profile_identifier: str, output_path: str) -> bool:
+        """Export a profile to a JSON file at specified path"""
+        profile = self.load_profile(profile_identifier)
+        if not profile:
+            return False
+
+        try:
+            profile_dict = profile_to_dict(profile, exclude_none=False)
+            with open(output_path, 'w') as f:
+                json.dump(profile_dict, f, indent=2, default=str)
+            print(f"Profile exported to {output_path}")
+            return True
+        except Exception as e:
+            print(f"Error exporting profile: {e}")
+            return False
+
+    def import_profile(self, input_path: str) -> Optional[Profile]:
+        """Import a profile from a JSON file"""
+        try:
+            with open(input_path, 'r') as f:
+                profile_data = json.load(f)
+            profile = dict_to_profile(profile_data)
+
+            is_valid, errors = self.validate_profile(profile)
+            if not is_valid:
+                print(f"Invalid profile: {', '.join(errors)}")
+                return None
+
+            self.save_profile(profile)
+            return profile
+        except Exception as e:
+            print(f"Error importing profile: {e}")
+            return None
+
 
 # =====================================================================
 # SINGLETON INSTANCE
