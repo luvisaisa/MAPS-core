@@ -4,5 +4,8 @@ lxml>=4.6.0
 openpyxl>=3.0.7
 python-dateutil>=2.8.0
 
+# Schema validation (Pydantic v2)
+pydantic>=2.0.0
+
 # Note: tkinter is usually included with Python
 # If missing, install with: apt-get install python3-tk (Linux)
