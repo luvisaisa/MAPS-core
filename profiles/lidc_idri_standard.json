@@ -1,0 +1,64 @@
+{
+  "profile_name": "lidc_idri_standard",
+  "file_type": "XML",
+  "source_format_description": "LIDC-IDRI Standard XML Format for Radiology Annotations",
+  "canonical_schema_version": "1.0",
+  "target_document_type": "RadiologyCanonicalDocument",
+  "description": "Profile for parsing LIDC-IDRI XML radiology annotation files with single or multiple reading sessions",
+  "version": "1.0.0",
+  "is_active": true,
+  "is_default": true,
+  "mappings": [
+    {
+      "source_path": "/LidcReadMessage/ResponseHeader/StudyInstanceUID",
+      "target_path": "study_instance_uid",
+      "data_type": "string",
+      "required": true,
+      "description": "DICOM Study Instance UID"
+    },
+    {
+      "source_path": "/LidcReadMessage/ResponseHeader/SeriesInstanceUID",
+      "target_path": "series_instance_uid",
+      "data_type": "string",
+      "required": true,
+      "description": "DICOM Series Instance UID"
+    },
+    {
+      "source_path": "/LidcReadMessage/ResponseHeader/DateService",
+      "target_path": "document_metadata.date",
+      "data_type": "date",
+      "required": false,
+      "description": "Service date for the radiology reading"
+    },
+    {
+      "source_path": "/LidcReadMessage/ResponseHeader/timeService",
+      "target_path": "fields.service_time",
+      "data_type": "string",
+      "required": false,
+      "description": "Service time"
+    },
+    {
+      "source_path": "/LidcReadMessage/ResponseHeader/Modality",
+      "target_path": "modality",
+      "data_type": "string",
+      "required": false,
+      "description": "Imaging modality (typically CT)"
+    },
+    {
+      "source_path": "/LidcReadMessage/readingSession",
+      "target_path": "radiologist_readings",
+      "data_type": "array",
+      "required": true,
+      "description": "Array of radiologist reading sessions with nodule annotations"
+    }
+  ],
+  "validation_rules": {
+    "required_fields": [
+      "study_instance_uid",
+      "series_instance_uid",
+      "radiologist_readings"
+    ],
+    "allow_extra_fields": true,
+    "strict_types": false
+  }
+}
