@@ -3,7 +3,7 @@
 Core functionality for parsing medical imaging XML annotation data.
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 from .parser import (
     parse_radiology_sample,
@@ -20,7 +20,31 @@ from .parser import (
 from .structure_detector import analyze_xml_structure
 from .gui import NYTXMLGuiApp
 
+# Schema-agnostic components
+from .schemas.canonical import (
+    CanonicalDocument,
+    RadiologyCanonicalDocument,
+    InvoiceCanonicalDocument,
+    DocumentMetadata,
+    Entity,
+    ExtractedEntities,
+    ValidationResult
+)
+
+from .schemas.profile import (
+    Profile,
+    FieldMapping,
+    ValidationRules,
+    FileType,
+    DataType
+)
+
+from .profile_manager import ProfileManager, get_profile_manager
+
+from .parsers.base import BaseParser
+
 __all__ = [
+    # Legacy parser API
     'parse_radiology_sample',
     'parse_multiple',
     'export_excel',
@@ -31,5 +55,23 @@ __all__ = [
     'extract_reading_sessions',
     'get_parse_statistics',
     'analyze_xml_structure',
-    'NYTXMLGuiApp'
+    'NYTXMLGuiApp',
+    # Canonical schemas
+    'CanonicalDocument',
+    'RadiologyCanonicalDocument',
+    'InvoiceCanonicalDocument',
+    'DocumentMetadata',
+    'Entity',
+    'ExtractedEntities',
+    'ValidationResult',
+    # Profile system
+    'Profile',
+    'FieldMapping',
+    'ValidationRules',
+    'FileType',
+    'DataType',
+    'ProfileManager',
+    'get_profile_manager',
+    # Parser interface
+    'BaseParser'
 ]
