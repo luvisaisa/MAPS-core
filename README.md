@@ -12,6 +12,9 @@ XML parser for medical imaging annotation data with GUI and CLI interfaces.
 - Batch processing
 - **GUI Application** (Tkinter-based)
 - Command-line interface
+- **Schema-agnostic data ingestion** (NEW)
+- Profile-based parsing system
+- Pydantic v2 canonical schemas
 
 ## Installation
 
@@ -61,8 +64,36 @@ main_dfs, unblinded_dfs = parse_multiple(xml_files)
 
 See [docs/PARSE_CASES.md](docs/PARSE_CASES.md) for details.
 
+## Schema-Agnostic System
+
+MAPS now supports flexible data ingestion through a profile-based mapping system:
+
+```python
+from maps import get_profile_manager, RadiologyCanonicalDocument
+
+# Load a profile
+manager = get_profile_manager()
+profile = manager.load_profile("lidc_idri_standard")
+
+# Create canonical documents with type safety
+doc = RadiologyCanonicalDocument(
+    document_metadata={"title": "CT Scan", "date": "2024-01-15"},
+    study_instance_uid="1.2.840.113654.2.55.12345",
+    modality="CT"
+)
+```
+
+Benefits:
+- Parse any format without code changes
+- Type-safe with Pydantic v2 validation
+- Profile inheritance and reusability
+- Extensible canonical schema
+
+See [docs/SCHEMA_AGNOSTIC.md](docs/SCHEMA_AGNOSTIC.md) for details.
+
 ## Documentation
 
+- [Schema-Agnostic System](docs/SCHEMA_AGNOSTIC.md)
 - [GUI Guide](docs/GUI_GUIDE.md)
 - [Parse Cases](docs/PARSE_CASES.md)
 - [Examples](examples/)
