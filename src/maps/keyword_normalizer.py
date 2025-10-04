@@ -112,3 +112,59 @@ class KeywordNormalizer:
     def filter_stopwords(self, tokens: List[str]) -> List[str]:
         """Filter stopwords from a list of tokens"""
         return [token for token in tokens if not self.is_stopword(token)]
+
+    def get_all_forms(self, keyword: str) -> List[str]:
+        """
+        Get all synonym forms of a keyword (for search expansion).
+
+        Examples:
+            get_all_forms("pulmonary") → ["pulmonary", "lung", "pneumonic", "pulmonic"]
+            get_all_forms("nodule") → ["nodule", "lesion", "mass", "growth", "tumor"]
+        """
+        canonical = self.normalize(keyword)
+        synonyms = [canonical]
+
+        for canon, syns in self.medical_terms.get('synonyms', {}).items():
+            if canon.lower() == canonical:
+                synonyms.extend([s.lower() for s in syns])
+                break
+
+        return list(set(synonyms))
+
+    def is_multi_word_term(self, text: str) -> bool:
+        """Check if text matches a known multi-word medical term"""
+        return text.lower() in self.multi_word_set
+
+    def detect_multi_word_terms(self, text: str) -> List[Tuple[str, int, int]]:
+        """
+        Detect multi-word medical terms in text.
+
+        Returns:
+            List of (term, start_pos, end_pos) tuples
+
+        Example:
+            detect_multi_word_terms("patient has ground glass opacity")
+            → [("ground glass opacity", 12, 32)]
+        """
+        text_lower = text.lower()
+        detected = []
+
+        sorted_terms = sorted(self.multi_word_set, key=len, reverse=True)
+
+        for term in sorted_terms:
+            start = 0
+            while True:
+                pos = text_lower.find(term, start)
+                if pos == -1:
+                    break
+
+                before_ok = pos == 0 or not text_lower[pos-1].isalnum()
+                after_ok = pos + len(term) == len(text_lower) or not text_lower[pos + len(term)].isalnum()
+
+                if before_ok and after_ok:
+                    detected.append((term, pos, pos + len(term)))
+
+                start = pos + 1
+
+        detected.sort(key=lambda x: x[1])
+        return detected
