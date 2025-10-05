@@ -1,0 +1,51 @@
+{
+  "synonyms": {
+    "pulmonary": ["lung", "pneumonic", "pulmonic"],
+    "nodule": ["lesion", "mass", "growth", "tumor"],
+    "opacity": ["density", "consolidation"],
+    "malignant": ["cancerous", "neoplastic"],
+    "benign": ["non-cancerous", "non-malignant"],
+    "radiologist": ["reader", "physician"],
+    "computed tomography": ["CT", "CAT scan"]
+  },
+  "abbreviations": {
+    "CT": "computed tomography",
+    "MRI": "magnetic resonance imaging",
+    "GGO": "ground glass opacity",
+    "PET": "positron emission tomography",
+    "DICOM": "digital imaging and communications in medicine",
+    "LIDC": "lung image database consortium",
+    "IDRI": "image database resource initiative",
+    "RUL": "right upper lobe",
+    "RML": "right middle lobe",
+    "RLL": "right lower lobe",
+    "LUL": "left upper lobe",
+    "LLL": "left lower lobe"
+  },
+  "multi_word_terms": [
+    "ground glass opacity",
+    "computed tomography",
+    "magnetic resonance imaging",
+    "positron emission tomography",
+    "right upper lobe",
+    "right middle lobe",
+    "right lower lobe",
+    "left upper lobe",
+    "left lower lobe",
+    "nodule characteristic",
+    "malignancy rating",
+    "subtlety score"
+  ],
+  "stopwords": [
+    "the", "and", "or", "in", "of", "to", "a", "is", "was", "for",
+    "with", "as", "by", "on", "at", "from", "this", "that", "these",
+    "those", "it", "its", "an", "are", "were", "been", "be", "has",
+    "have", "had", "will", "would", "can", "could", "should", "may",
+    "might", "must"
+  ],
+  "anatomical_terms": {
+    "lobes": ["right upper lobe", "right middle lobe", "right lower lobe", "left upper lobe", "left lower lobe"],
+    "airways": ["trachea", "bronchus", "bronchi", "bronchiole"],
+    "vasculature": ["aorta", "pulmonary artery", "pulmonary vein", "vena cava"]
+  }
+}
