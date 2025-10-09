@@ -3,7 +3,7 @@
 Core functionality for parsing medical imaging XML annotation data.
 """
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 from .parser import (
     parse_radiology_sample,
@@ -43,6 +43,20 @@ from .profile_manager import ProfileManager, get_profile_manager
 
 from .parsers.base import BaseParser
 
+# Keyword extraction system
+from .keyword_normalizer import KeywordNormalizer
+from .pdf_keyword_extractor import (
+    PDFKeywordExtractor,
+    PDFMetadata,
+    ExtractedPDFKeyword
+)
+from .keyword_search import (
+    KeywordSearchEngine,
+    SearchResult,
+    SearchResponse,
+    QueryParser
+)
+
 __all__ = [
     # Legacy parser API
     'parse_radiology_sample',
@@ -73,5 +87,14 @@ __all__ = [
     'ProfileManager',
     'get_profile_manager',
     # Parser interface
-    'BaseParser'
+    'BaseParser',
+    # Keyword extraction
+    'KeywordNormalizer',
+    'PDFKeywordExtractor',
+    'PDFMetadata',
+    'ExtractedPDFKeyword',
+    'KeywordSearchEngine',
+    'SearchResult',
+    'SearchResponse',
+    'QueryParser'
 ]
