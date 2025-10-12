@@ -15,6 +15,9 @@ XML parser for medical imaging annotation data with GUI and CLI interfaces.
 - **Schema-agnostic data ingestion** (NEW)
 - Profile-based parsing system
 - Pydantic v2 canonical schemas
+- **Keyword extraction from PDFs** (NEW)
+- Medical term normalization and search
+- Boolean query support
 
 ## Installation
 
@@ -91,9 +94,41 @@ Benefits:
 
 See [docs/SCHEMA_AGNOSTIC.md](docs/SCHEMA_AGNOSTIC.md) for details.
 
+## Keyword Extraction
+
+Extract and analyze medical keywords from research papers and XML files:
+
+```python
+from maps import KeywordNormalizer, PDFKeywordExtractor, KeywordSearchEngine
+
+# Normalize medical terms
+normalizer = KeywordNormalizer()
+normalized = normalizer.normalize("GGO")  # → "ground glass opacity"
+synonyms = normalizer.get_all_forms("nodule")  # → ["nodule", "lesion", "mass", ...]
+
+# Extract from PDFs
+extractor = PDFKeywordExtractor()
+metadata, keywords = extractor.extract_from_pdf("paper.pdf")
+
+# Search with boolean queries
+search_engine = KeywordSearchEngine(normalizer)
+results = search_engine.search("lung AND nodule")
+```
+
+Features:
+- Medical terminology normalization
+- Abbreviation expansion (CT → computed tomography)
+- Multi-word term detection
+- PDF metadata and keyword extraction
+- Boolean search (AND/OR operators)
+- Synonym expansion for comprehensive search
+
+See [docs/KEYWORD_EXTRACTION.md](docs/KEYWORD_EXTRACTION.md) for details.
+
 ## Documentation
 
 - [Schema-Agnostic System](docs/SCHEMA_AGNOSTIC.md)
+- [Keyword Extraction](docs/KEYWORD_EXTRACTION.md)
 - [GUI Guide](docs/GUI_GUIDE.md)
 - [Parse Cases](docs/PARSE_CASES.md)
 - [Examples](examples/)
