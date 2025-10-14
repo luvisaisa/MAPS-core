@@ -3,7 +3,7 @@
 Core functionality for parsing medical imaging XML annotation data.
 """
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 from .parser import (
     parse_radiology_sample,
@@ -57,6 +57,10 @@ from .keyword_search import (
     QueryParser
 )
 
+# Auto-analysis system
+from .xml_keyword_extractor import XMLKeywordExtractor, XMLExtractedKeyword
+from .auto_analysis import AutoAnalyzer
+
 __all__ = [
     # Legacy parser API
     'parse_radiology_sample',
@@ -96,5 +100,9 @@ __all__ = [
     'KeywordSearchEngine',
     'SearchResult',
     'SearchResponse',
-    'QueryParser'
+    'QueryParser',
+    # Auto-analysis
+    'XMLKeywordExtractor',
+    'XMLExtractedKeyword',
+    'AutoAnalyzer'
 ]
