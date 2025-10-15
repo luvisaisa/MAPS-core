@@ -18,6 +18,9 @@ XML parser for medical imaging annotation data with GUI and CLI interfaces.
 - **Keyword extraction from PDFs** (NEW)
 - Medical term normalization and search
 - Boolean query support
+- **Auto-analysis & entity extraction** (NEW)
+- Automatic canonical document population
+- Semantic characteristic mapping
 
 ## Installation
 
@@ -124,6 +127,37 @@ Features:
 - Synonym expansion for comprehensive search
 
 See [docs/KEYWORD_EXTRACTION.md](docs/KEYWORD_EXTRACTION.md) for details.
+
+## Auto-Analysis
+
+Automatically extract keywords and entities from XML files with semantic understanding:
+
+```python
+from maps import AutoAnalyzer
+
+# Create analyzer
+analyzer = AutoAnalyzer()
+
+# Auto-analyze XML file
+doc = analyzer.analyze_xml("scan.xml")
+
+# Canonical document with auto-populated entities
+print(f"Study UID: {doc.study_instance_uid}")
+print(f"Nodules: {len(doc.nodules)}")
+print(f"Entities: {len(doc.entities.medical_terms)} medical terms")
+print(f"Confidence: {doc.extraction_metadata.overall_confidence}")
+
+# Batch analysis
+documents = analyzer.analyze_batch(xml_files)
+summary = analyzer.get_analysis_summary(documents)
+```
+
+Features:
+- Automatic keyword extraction from XML
+- Semantic characteristic mapping (subtlety=5 → "obvious", "very_clear")
+- Entity population (dates, identifiers, medical terms)
+- Batch processing with statistics
+- Canonical document output ready for storage
 
 ## Documentation
 
