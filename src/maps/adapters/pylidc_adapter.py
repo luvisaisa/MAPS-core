@@ -190,3 +190,89 @@ class PyLIDCAdapter:
         consensus["diameter_mean"] = round(statistics.mean(diameters), 2)
 
         return consensus
+
+    def scans_to_canonical_batch(
+        self,
+        scans: List,
+        include_annotations: bool = True,
+        progress_callback: Optional[callable] = None
+    ) -> List[RadiologyCanonicalDocument]:
+        """
+        Convert multiple scans to canonical documents in batch.
+
+        Args:
+            scans: List of pylidc.Scan objects
+            include_annotations: Whether to include annotation data
+            progress_callback: Optional callback(current, total, scan_id)
+
+        Returns:
+            List of RadiologyCanonicalDocument objects
+        """
+        documents = []
+        total = len(scans)
+
+        for i, scan in enumerate(scans, start=1):
+            if progress_callback:
+                progress_callback(i, total, scan.patient_id)
+
+            try:
+                doc = self.scan_to_canonical(
+                    scan,
+                    include_annotations=include_annotations
+                )
+                documents.append(doc)
+            except Exception as e:
+                print(f"Error converting scan {scan.patient_id}: {e}")
+                continue
+
+        return documents
+
+    def query_and_convert(
+        self,
+        patient_ids: Optional[List[str]] = None,
+        max_scans: Optional[int] = None
+    ) -> List[RadiologyCanonicalDocument]:
+        """
+        Query LIDC database and convert scans to canonical format.
+
+        Args:
+            patient_ids: Optional list of patient IDs to query
+            max_scans: Optional maximum number of scans to process
+
+        Returns:
+            List of RadiologyCanonicalDocument objects
+        """
+        if not PYLIDC_AVAILABLE:
+            raise ImportError("pylidc not available")
+
+        query = pl.query(pl.Scan)
+
+        if patient_ids:
+            query = query.filter(pl.Scan.patient_id.in_(patient_ids))
+
+        if max_scans:
+            scans = query.limit(max_scans).all()
+        else:
+            scans = query.all()
+
+        return self.scans_to_canonical_batch(scans)
+
+    def get_scan_statistics(self, doc: RadiologyCanonicalDocument) -> Dict[str, Any]:
+        """Get statistics from converted canonical document"""
+        stats = {
+            'patient_id': doc.fields.get('patient_id'),
+            'num_nodules': len(doc.nodules),
+            'num_readings': len(doc.radiologist_readings),
+            'modality': doc.modality,
+            'slice_thickness': doc.fields.get('slice_thickness'),
+            'has_contrast': doc.fields.get('contrast_used', False)
+        }
+
+        if doc.nodules:
+            total_radiologists = sum(
+                nodule.get('num_radiologists', 0)
+                for nodule in doc.nodules
+            )
+            stats['total_annotations'] = total_radiologists
+
+        return stats
