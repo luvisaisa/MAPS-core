@@ -10,5 +10,8 @@ pydantic>=2.0.0
 # PDF processing
 pdfplumber>=0.9.0
 
+# LIDC-IDRI dataset integration (optional)
+# pylidc>=0.2.0  # Uncomment to enable PYLIDC integration
+
 # Note: tkinter is usually included with Python
 # If missing, install with: apt-get install python3-tk (Linux)
