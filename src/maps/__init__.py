@@ -61,6 +61,9 @@ from .keyword_search import (
 from .xml_keyword_extractor import XMLKeywordExtractor, XMLExtractedKeyword
 from .auto_analysis import AutoAnalyzer
 
+# Adapters
+from .adapters import PyLIDCAdapter
+
 __all__ = [
     # Legacy parser API
     'parse_radiology_sample',
@@ -104,5 +107,7 @@ __all__ = [
     # Auto-analysis
     'XMLKeywordExtractor',
     'XMLExtractedKeyword',
-    'AutoAnalyzer'
+    'AutoAnalyzer',
+    # Adapters
+    'PyLIDCAdapter'
 ]
