@@ -21,6 +21,8 @@ XML parser for medical imaging annotation data with GUI and CLI interfaces.
 - **Auto-analysis & entity extraction** (NEW)
 - Automatic canonical document population
 - Semantic characteristic mapping
+- **LIDC-IDRI dataset integration** (NEW)
+- PYLIDC adapter with consensus metrics
 
 ## Installation
 
