@@ -1,7 +1,7 @@
 """Parser endpoints"""
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from typing import Optional
+from typing import Optional, List
 import tempfile
 import os
 import logging
@@ -110,3 +110,55 @@ async def parse_xml_batch(
         "results": results,
         "errors": errors
     }
+
+
+@router.post("/parse/pdf")
+async def parse_pdf_file(file: UploadFile = File(...)):
+    """
+    Extract keywords from PDF file.
+
+    Args:
+        file: PDF file to parse
+
+    Returns:
+        PDF metadata and extracted keywords
+    """
+    if not file.filename.endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="File must be PDF format")
+
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+            content = await file.read()
+            tmp.write(content)
+            tmp_path = tmp.name
+
+        from maps.pdf_keyword_extractor import PDFKeywordExtractor
+        extractor = PDFKeywordExtractor()
+        metadata, keywords = extractor.extract_from_pdf(tmp_path)
+
+        os.unlink(tmp_path)
+
+        return {
+            "status": "success",
+            "filename": file.filename,
+            "metadata": {
+                "title": metadata.title,
+                "authors": metadata.authors,
+                "abstract": metadata.abstract,
+                "page_count": metadata.page_count
+            },
+            "keywords": [
+                {
+                    "keyword": kw.keyword,
+                    "frequency": kw.frequency,
+                    "normalized_form": kw.normalized_form,
+                    "category": kw.category
+                } for kw in keywords
+            ]
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to parse PDF: {e}")
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise HTTPException(status_code=500, detail=f"PDF parsing failed: {str(e)}")
