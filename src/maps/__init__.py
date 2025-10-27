@@ -3,7 +3,7 @@
 Core functionality for parsing medical imaging XML annotation data.
 """
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 from .parser import (
     parse_radiology_sample,
@@ -64,6 +64,9 @@ from .auto_analysis import AutoAnalyzer
 # Adapters
 from .adapters import PyLIDCAdapter
 
+# REST API
+from .api.app import create_app
+
 __all__ = [
     # Legacy parser API
     'parse_radiology_sample',
@@ -109,5 +112,7 @@ __all__ = [
     'XMLExtractedKeyword',
     'AutoAnalyzer',
     # Adapters
-    'PyLIDCAdapter'
+    'PyLIDCAdapter',
+    # REST API
+    'create_app'
 ]
