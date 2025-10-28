@@ -66,3 +66,36 @@ async def get_profile(name: str):
     except Exception as e:
         logger.error(f"Failed to get profile: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{name}/validate")
+async def validate_profile(name: str):
+    """
+    Validate profile configuration.
+
+    Args:
+        name: Profile name
+
+    Returns:
+        Validation results
+    """
+    try:
+        from maps.profile_manager import get_profile_manager
+        manager = get_profile_manager()
+        profile = manager.load_profile(name)
+
+        if not profile:
+            raise HTTPException(status_code=404, detail=f"Profile '{name}' not found")
+
+        is_valid, errors = manager.validate_profile(profile)
+
+        return {
+            "profile_name": name,
+            "is_valid": is_valid,
+            "errors": errors
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Validation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
