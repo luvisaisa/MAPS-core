@@ -23,6 +23,8 @@ XML parser for medical imaging annotation data with GUI and CLI interfaces.
 - Semantic characteristic mapping
 - **LIDC-IDRI dataset integration** (NEW)
 - PYLIDC adapter with consensus metrics
+- **REST API** (NEW)
+- FastAPI-based web service with OpenAPI documentation
 
 ## Installation
 
@@ -43,6 +45,26 @@ Features:
 - Progress tracking
 - Real-time logging
 - One-click parsing and export
+
+### REST API
+
+```bash
+# Start the API server
+python scripts/run_server.py
+
+# Access interactive documentation
+# Swagger UI: http://localhost:8000/docs
+# ReDoc: http://localhost:8000/redoc
+```
+
+Features:
+- File upload and parsing endpoints
+- Profile management
+- Keyword search and normalization
+- Auto-analysis
+- Full OpenAPI documentation
+
+See [docs/API_ENDPOINTS.md](docs/API_ENDPOINTS.md) for details.
 
 ### CLI (Programmatic)
 
