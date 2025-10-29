@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
 
 
 def create_app() -> FastAPI:
@@ -14,6 +15,11 @@ def create_app() -> FastAPI:
         redoc_url="/redoc"
     )
 
+    # Add middleware
+    from .middleware import LoggingMiddleware, validation_exception_handler, general_exception_handler
+
+    app.add_middleware(LoggingMiddleware)
+
     # CORS middleware
     app.add_middleware(
         CORSMiddleware,
@@ -22,6 +28,10 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Exception handlers
+    app.add_exception_handler(RequestValidationError, validation_exception_handler)
+    app.add_exception_handler(Exception, general_exception_handler)
 
     # Register routers
     from .routers import health, parser, profiles, keywords, analysis, detection
