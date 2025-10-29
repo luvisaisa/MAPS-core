@@ -24,12 +24,13 @@ def create_app() -> FastAPI:
     )
 
     # Register routers
-    from .routers import health, parser, profiles, keywords, analysis
+    from .routers import health, parser, profiles, keywords, analysis, detection
 
     app.include_router(health.router, prefix="/api", tags=["health"])
     app.include_router(parser.router, prefix="/api/parse", tags=["parser"])
     app.include_router(profiles.router, prefix="/api/profiles", tags=["profiles"])
     app.include_router(keywords.router, prefix="/api/keywords", tags=["keywords"])
     app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
+    app.include_router(detection.router, prefix="/api/detect", tags=["detection"])
 
     return app
