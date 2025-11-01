@@ -34,7 +34,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(Exception, general_exception_handler)
 
     # Register routers
-    from .routers import health, parser, profiles, keywords, analysis, detection
+    from .routers import health, parser, profiles, keywords, analysis, detection, export
 
     app.include_router(health.router, prefix="/api", tags=["health"])
     app.include_router(parser.router, prefix="/api/parse", tags=["parser"])
@@ -42,5 +42,6 @@ def create_app() -> FastAPI:
     app.include_router(keywords.router, prefix="/api/keywords", tags=["keywords"])
     app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
     app.include_router(detection.router, prefix="/api/detect", tags=["detection"])
+    app.include_router(export.router, prefix="/api/export", tags=["export"])
 
     return app
