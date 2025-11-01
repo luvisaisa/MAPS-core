@@ -3,12 +3,14 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
 import logging
+from ..cache import cache_response
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
 @router.get("")
+@cache_response(ttl=600)  # Cache for 10 minutes
 async def list_profiles():
     """
     List all available parsing profiles.
