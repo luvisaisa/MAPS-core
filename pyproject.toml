@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maps-core"
+version = "0.7.0"
+description = "Medical Annotation Processing System"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Isa Lucia Schlichting", email = "isa.lucia.sch@gmail.com"}
+]
+keywords = ["medical", "imaging", "xml", "parsing", "lidc", "radiology"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Homepage = "https://github.com/luvisaisa/MAPS-core"
+Documentation = "https://github.com/luvisaisa/MAPS-core/tree/main/docs"
+Repository = "https://github.com/luvisaisa/MAPS-core"
+Issues = "https://github.com/luvisaisa/MAPS-core/issues"
