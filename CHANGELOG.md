@@ -126,3 +126,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.0]: https://github.com/luvisaisa/MAPS-core/releases/tag/v0.2.0
 [0.1.1]: https://github.com/luvisaisa/MAPS-core/releases/tag/v0.1.1
 [0.1.0]: https://github.com/luvisaisa/MAPS-core/releases/tag/v0.1.0
+
+## [1.0.0] - 2025-11-28
+
+### Release Notes
+
+First stable release of MAPS with complete feature set.
+
+### Features Complete
+- XML parsing with parse case detection
+- Profile-based schema-agnostic parsing
+- Keyword extraction and normalization
+- Auto-analysis and entity extraction
+- PYLIDC adapter integration  
+- REST API with FastAPI
+- Comprehensive documentation
+- Full test coverage
+
+### Production Ready
+- Stable API contract
+- Security audit complete
+- Performance optimizations applied
+- Deployment guides provided
