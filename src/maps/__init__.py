@@ -3,7 +3,7 @@
 Core functionality for parsing medical imaging XML annotation data.
 """
 
-__version__ = "0.7.0"
+__version__ = "1.0.0"
 
 from .parser import (
     parse_radiology_sample,
