@@ -70,3 +70,28 @@ dist/
 *.pyz
 *.dylib
 .venv/
+
+# IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# Jupyter
+.ipynb_checkpoints
+
+# mypy
+.mypy_cache/
+.dmypy.json
+
+# Distribution
+dist/
+build/
+*.egg
+*.whl
