@@ -190,3 +190,16 @@ Features:
 - [GUI Guide](docs/GUI_GUIDE.md)
 - [Parse Cases](docs/PARSE_CASES.md)
 - [Examples](examples/)
+
+
+## Version History
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
+
+## Documentation
+
+Complete documentation available in [docs/](docs/) directory. Start with [docs/INDEX.md](docs/INDEX.md).
+
+## Support
+
+For issues and questions, please use the GitHub issue tracker.
