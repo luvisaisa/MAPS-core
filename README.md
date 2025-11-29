@@ -203,3 +203,10 @@ Complete documentation available in [docs/](docs/) directory. Start with [docs/I
 ## Support
 
 For issues and questions, please use the GitHub issue tracker.
+
+
+## Community
+
+- Discussions: GitHub Discussions
+- Issues: GitHub Issues  
+- Email: isa.lucia.sch@gmail.com
