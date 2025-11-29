@@ -26,6 +26,13 @@ XML parser for medical imaging annotation data with GUI and CLI interfaces.
 - **REST API** (NEW)
 - FastAPI-based web service with OpenAPI documentation
 
+## Quick Links
+
+- [Documentation](docs/INDEX.md)
+- [API Reference](docs/API_REFERENCE.md)
+- [Contributing](docs/CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
+
 ## Installation
 
 ```bash
