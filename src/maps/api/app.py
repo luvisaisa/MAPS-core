@@ -11,6 +11,7 @@ def create_app() -> FastAPI:
         title="MAPS API",
         description="Medical Annotation Processing System REST API",
         version="1.0.0",
+        contact={"name": "Isa Lucia Schlichting", "email": "isa.lucia.sch@gmail.com"},
         docs_url="/docs",
         redoc_url="/redoc"
     )
