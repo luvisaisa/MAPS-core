@@ -1,5 +1,11 @@
 # MAPS - Medical Annotation Processing System
 
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg)](https://fastapi.tiangolo.com)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Pydantic v2](https://img.shields.io/badge/pydantic-v2-E92063.svg)](https://pydantic.dev)
+
 ## Overview
 
 **MAPS (Medical Annotation Processing System)** is a comprehensive Python-based application designed to parse, analyze, and export medical imaging annotation data from various medical imaging systems and file formats. Built specifically for handling complex medical imaging session data with multiple observer readings, nodule annotations, coordinate mappings, and research literature.
