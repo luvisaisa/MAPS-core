@@ -95,3 +95,5 @@ dist/
 build/
 *.egg
 *.whl
+*.log
+logs/
