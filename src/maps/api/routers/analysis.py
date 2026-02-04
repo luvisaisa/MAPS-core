@@ -34,7 +34,7 @@ async def analyze_xml_file(
             tmp.write(content)
             tmp_path = tmp.name
 
-        from maps.auto_analysis import AutoAnalyzer
+        from ...auto_analysis import AutoAnalyzer
         analyzer = AutoAnalyzer()
         document = analyzer.analyze_xml(tmp_path, populate_entities=populate_entities)
 

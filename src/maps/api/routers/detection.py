@@ -29,7 +29,7 @@ async def detect_parse_case(file: UploadFile = File(...)):
             tmp.write(content)
             tmp_path = tmp.name
 
-        from maps.structure_detector import analyze_xml_structure
+        from ...structure_detector import analyze_xml_structure
         structure = analyze_xml_structure(tmp_path)
 
         os.unlink(tmp_path)

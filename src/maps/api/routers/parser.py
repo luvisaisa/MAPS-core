@@ -36,7 +36,7 @@ async def parse_xml_file(
             tmp_path = tmp.name
 
         # Parse using profile
-        from maps.parsers.xml_parser import XMLParser
+        from ...parsers.xml_parser import XMLParser
         parser = XMLParser(profile_name=profile_name)
         document = parser.parse(tmp_path)
 
@@ -86,7 +86,7 @@ async def parse_xml_batch(
                 tmp.write(content)
                 tmp_path = tmp.name
 
-            from maps.parsers.xml_parser import XMLParser
+            from ...parsers.xml_parser import XMLParser
             parser = XMLParser(profile_name=profile_name)
             document = parser.parse(tmp_path)
             os.unlink(tmp_path)
@@ -132,7 +132,7 @@ async def parse_pdf_file(file: UploadFile = File(...)):
             tmp.write(content)
             tmp_path = tmp.name
 
-        from maps.pdf_keyword_extractor import PDFKeywordExtractor
+        from ...pdf_keyword_extractor import PDFKeywordExtractor
         extractor = PDFKeywordExtractor()
         metadata, keywords = extractor.extract_from_pdf(tmp_path)
 

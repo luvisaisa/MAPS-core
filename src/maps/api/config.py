@@ -1,11 +1,12 @@
 """API configuration settings"""
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
 
 
 class APISettings(BaseSettings):
     """API configuration"""
+    model_config = SettingsConfigDict(env_file=".env", env_prefix="MAPS_")
 
     # Application
     app_name: str = "MAPS API"
@@ -32,10 +33,6 @@ class APISettings(BaseSettings):
 
     # Profiles
     profile_directory: str = "./profiles"
-
-    class Config:
-        env_file = ".env"
-        env_prefix = "MAPS_"
 
 
 def get_settings() -> APISettings:

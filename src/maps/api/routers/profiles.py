@@ -19,7 +19,7 @@ async def list_profiles():
         List of profile names and metadata
     """
     try:
-        from maps.profile_manager import get_profile_manager
+        from ...profile_manager import get_profile_manager
         manager = get_profile_manager()
         profiles = manager.list_profiles()
 
@@ -49,7 +49,7 @@ async def get_profile(name: str):
         Full profile configuration
     """
     try:
-        from maps.profile_manager import get_profile_manager
+        from ...profile_manager import get_profile_manager
         manager = get_profile_manager()
         profile = manager.load_profile(name)
 
@@ -82,7 +82,7 @@ async def validate_profile(name: str):
         Validation results
     """
     try:
-        from maps.profile_manager import get_profile_manager
+        from ...profile_manager import get_profile_manager
         manager = get_profile_manager()
         profile = manager.load_profile(name)
 

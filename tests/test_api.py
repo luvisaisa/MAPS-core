@@ -4,7 +4,7 @@ Tests for MAPS REST API
 
 import pytest
 from fastapi.testclient import TestClient
-from maps.api.app import create_app
+from src.maps.api.app import create_app
 
 
 @pytest.fixture

@@ -26,8 +26,8 @@ async def search_keywords(
         Search results with relevance scores
     """
     try:
-        from maps.keyword_search import KeywordSearchEngine
-        from maps.keyword_normalizer import KeywordNormalizer
+        from ...keyword_search import KeywordSearchEngine
+        from ...keyword_normalizer import KeywordNormalizer
 
         normalizer = KeywordNormalizer()
         search_engine = KeywordSearchEngine(normalizer)
@@ -40,13 +40,13 @@ async def search_keywords(
 
         return {
             "query": response.query,
-            "expanded_query": response.expanded_query,
+            "expanded_query_terms": response.expanded_query_terms,
             "total_results": response.total_results,
             "results": [
                 {
-                    "keyword": r.keyword,
-                    "relevance": r.relevance,
-                    "matched_terms": r.matched_terms
+                    "keyword": r.keyword_text,
+                    "relevance": r.relevance_score,
+                    "matched_terms": r.matched_query_terms
                 } for r in response.results
             ]
         }
@@ -72,7 +72,7 @@ async def normalize_keyword(
         Normalized keyword and all forms
     """
     try:
-        from maps.keyword_normalizer import KeywordNormalizer
+        from ...keyword_normalizer import KeywordNormalizer
 
         normalizer = KeywordNormalizer()
         normalized = normalizer.normalize(keyword, expand_abbreviations)
