@@ -1,10 +1,13 @@
 """Core XML parsing functions for medical annotation data."""
 
+import logging
 import xml.etree.ElementTree as ET
 import re
 import pandas as pd
 from typing import Tuple, Dict, List, Any, Optional
 import os
+
+logger = logging.getLogger(__name__)
 
 
 def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -24,11 +27,11 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
     
-    print(f"Parsing XML file: {os.path.basename(file_path)}")
+    logger.info(f"Parsing XML file: {os.path.basename(file_path)}")
     
     # Detect parse case first
     parse_case = detect_parse_case(file_path)
-    print(f"  Parse case: {parse_case}")
+    logger.info(f"Parse case: {parse_case}")
     
     expected_attrs = get_expected_attributes_for_case(parse_case)
     
@@ -58,7 +61,7 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
                 header_values[field] = elem.text
             else:
                 header_values[field] = "MISSING"
-                print(f"  Warning: {field} expected but MISSING")
+                logger.warning(f"Expected field missing: {field}")
     
     # Extract nodule data with characteristics
     records = []
@@ -86,7 +89,7 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     main_df = pd.DataFrame(records) if records else pd.DataFrame()
     unblinded_df = pd.DataFrame()  # Placeholder for now
     
-    print(f"  Parsed {len(records)} nodule records")
+    logger.info(f"Parsed {len(records)} nodule records")
     
     return main_df, unblinded_df
 
@@ -298,9 +301,9 @@ def parse_multiple(files: List[str]) -> Tuple[Dict[str, pd.DataFrame], Dict[str,
             file_id = os.path.basename(file_path).split('.')[0]
             main_dfs[file_id] = main_df
             unblinded_dfs[file_id] = unblinded_df
-            print(f"Successfully parsed {file_id}")
+            logger.info(f"Successfully parsed {file_id}")
         except Exception as e:
-            print(f"Error parsing {file_path}: {e}")
+            logger.error(f"Error parsing {file_path}: {e}")
     
     return main_dfs, unblinded_dfs
 
@@ -325,7 +328,7 @@ def export_excel(df: pd.DataFrame, output_path: str) -> None:
         ws.append(r)
     
     wb.save(output_path)
-    print(f"Exported to {output_path}")
+    logger.info(f"Exported to {output_path}")
 
 
 def get_parse_statistics(main_dfs: Dict[str, pd.DataFrame]) -> Dict[str, Any]:

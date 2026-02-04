@@ -4,11 +4,14 @@ Base parser interface for MAPS
 Defines the abstract interface that all parsers must implement.
 """
 
+import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, Dict, Any
 
 from ..schemas.canonical import CanonicalDocument
+
+logger = logging.getLogger(__name__)
 
 
 class BaseParser(ABC):
@@ -91,7 +94,7 @@ class BaseParser(ABC):
                 doc = self.parse(file_path)
                 results.append(doc)
             except Exception as e:
-                print(f"Error parsing {file_path}: {e}")
+                logger.error(f"Error parsing {file_path}: {e}")
                 continue
         return results
 

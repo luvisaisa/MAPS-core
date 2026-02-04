@@ -13,6 +13,7 @@ Usage:
     canonical_doc = adapter.scan_to_canonical(scan)
 """
 
+import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 from decimal import Decimal
@@ -29,6 +30,8 @@ from ..schemas.canonical import (
     DocumentMetadata,
     ExtractionMetadata
 )
+
+logger = logging.getLogger(__name__)
 
 
 class PyLIDCAdapter:
@@ -222,7 +225,7 @@ class PyLIDCAdapter:
                 )
                 documents.append(doc)
             except Exception as e:
-                print(f"Error converting scan {scan.patient_id}: {e}")
+                logger.error(f"Error converting scan {scan.patient_id}: {e}")
                 continue
 
         return documents

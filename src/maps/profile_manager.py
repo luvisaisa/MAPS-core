@@ -7,6 +7,7 @@ Version: 1.0.0
 """
 
 import json
+import logging
 import os
 from typing import Optional, List, Dict, Any
 from pathlib import Path
@@ -19,6 +20,8 @@ from .schemas.profile import (
     dict_to_profile,
     FileType
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ProfileManager:
@@ -73,7 +76,7 @@ class ProfileManager:
                     profile = dict_to_profile(profile_data)
                     self._add_to_cache(profile)
                 except Exception as e:
-                    print(f"Failed to load profile {filename}: {e}")
+                    logger.error(f"Failed to load profile {filename}: {e}")
 
     def _add_to_cache(self, profile: Profile):
         """Add a profile to the cache"""
@@ -114,7 +117,7 @@ class ProfileManager:
             self._add_to_cache(profile)
             return profile
         except Exception as e:
-            print(f"Error loading profile {profile_name}: {e}")
+            logger.error(f"Error loading profile {profile_name}: {e}")
             return None
 
     def _load_from_database(self, profile_identifier: str) -> Optional[Profile]:
@@ -141,7 +144,7 @@ class ProfileManager:
 
         existing = self.load_profile(profile.profile_name)
         if existing and not overwrite:
-            print(f"Profile '{profile.profile_name}' already exists. Use overwrite=True to replace.")
+            logger.warning(f"Profile '{profile.profile_name}' already exists. Use overwrite=True to replace.")
             return False
 
         if self.use_database and self.db_connection:
@@ -162,10 +165,10 @@ class ProfileManager:
             profile_dict = profile_to_dict(profile, exclude_none=False)
             with open(filepath, 'w') as f:
                 json.dump(profile_dict, f, indent=2, default=str)
-            print(f"Profile '{profile.profile_name}' saved to {filepath}")
+            logger.info(f"Profile '{profile.profile_name}' saved to {filepath}")
             return True
         except Exception as e:
-            print(f"Error saving profile {profile.profile_name}: {e}")
+            logger.error(f"Error saving profile {profile.profile_name}: {e}")
             return False
 
     def _save_to_database(self, profile: Profile) -> bool:
@@ -207,7 +210,7 @@ class ProfileManager:
         """
         profile = self.load_profile(profile_identifier)
         if not profile:
-            print(f"Profile '{profile_identifier}' not found")
+            logger.warning(f"Profile '{profile_identifier}' not found")
             return False
 
         if profile.profile_name in self._profile_cache:
@@ -226,10 +229,10 @@ class ProfileManager:
         try:
             if os.path.exists(filepath):
                 os.remove(filepath)
-                print(f"Profile '{profile.profile_name}' deleted")
+                logger.info(f"Profile '{profile.profile_name}' deleted")
             return True
         except Exception as e:
-            print(f"Error deleting profile {profile.profile_name}: {e}")
+            logger.error(f"Error deleting profile {profile.profile_name}: {e}")
             return False
 
     def _delete_from_database(self, profile: Profile) -> bool:
@@ -298,7 +301,7 @@ class ProfileManager:
 
         parent = self.load_profile(profile.parent_profile_id)
         if not parent:
-            print(f"Parent profile {profile.parent_profile_id} not found")
+            logger.warning(f"Parent profile {profile.parent_profile_id} not found")
             return profile
 
         parent = self.resolve_profile_with_inheritance(parent)
@@ -321,10 +324,10 @@ class ProfileManager:
             profile_dict = profile_to_dict(profile, exclude_none=False)
             with open(output_path, 'w') as f:
                 json.dump(profile_dict, f, indent=2, default=str)
-            print(f"Profile exported to {output_path}")
+            logger.info(f"Profile exported to {output_path}")
             return True
         except Exception as e:
-            print(f"Error exporting profile: {e}")
+            logger.error(f"Error exporting profile: {e}")
             return False
 
     def import_profile(self, input_path: str) -> Optional[Profile]:
@@ -336,13 +339,13 @@ class ProfileManager:
 
             is_valid, errors = self.validate_profile(profile)
             if not is_valid:
-                print(f"Invalid profile: {', '.join(errors)}")
+                logger.error(f"Invalid profile: {', '.join(errors)}")
                 return None
 
             self.save_profile(profile)
             return profile
         except Exception as e:
-            print(f"Error importing profile: {e}")
+            logger.error(f"Error importing profile: {e}")
             return None
 
 
