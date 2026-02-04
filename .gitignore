@@ -49,6 +49,7 @@ configs/config.json
 .github/instructions/*.instructions.md
 *CLAUDE*.md
 *claude*.md
+.claude/
 
 # Large binary files
 *.dylib
