@@ -137,7 +137,7 @@ ORDER BY z_bin;
    - Data integrity and performance
    - Automatic Excel export included
 
-## **Next Steps** 1. **Try SQLite with your XML files:** - Use the "Export to SQLite" button in the GUI
+## **Next Steps** 1. **Try SQLite with your XML files:** - Use the API endpoint `/api/export/sqlite` or export functions
    - Explore the generated analysis Excel file
    - Run custom queries using the advanced_queries.py script
 

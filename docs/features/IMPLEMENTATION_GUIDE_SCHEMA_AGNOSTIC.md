@@ -25,7 +25,7 @@
 - **Existing System:** Radiology XML parser (`parser.py`) with hardcoded LIDC-IDRI format logic
 - **Database:** SQLite-based storage (`database.py`, `radiology_database.py`)
 - **Export:** Excel (MAPS format) and SQLite
-- **GUI:** Tkinter-based interface for file selection and processing
+- **Interface:** API-based access for programmatic processing
 
 ### Target State
 - **Schema-Agnostic Parser:** Generic parsers (XML, JSON, CSV, PDF) driven by configuration profiles
@@ -33,7 +33,7 @@
 - **Profile System:** Externally-defined mapping profiles (JSON/database) for each format variant
 - **PostgreSQL Database:** JSONB-based flexible storage with full-text search
 - **REST API:** FastAPI-based API for programmatic access
-- **GUI:** Enhanced interface for non-technical users with query builder
+- **Web Clients:** Support for frontend frameworks (React, Vue) via REST API
 - **Extensibility:** Plugin architecture for adding new file types without code changes
 
 ### Key Design Principles
@@ -872,7 +872,7 @@ print(f'Profile manager initialized with {len(manager.list_profiles())} profiles
 
 **Questions to Resolve:**
 - [ ] Do you want to maintain SQLite alongside PostgreSQL during migration?
-- [ ] Should the GUI be updated to use the new system, or keep separate?
+- [ ] Should API versioning be implemented now or later?
 - [ ] What authentication/authorization needed for the API (if any)?
 
 ---

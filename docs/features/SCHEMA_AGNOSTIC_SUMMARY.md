@@ -14,7 +14,7 @@ Transform the existing LIDC-IDRI-specific XML parser into a **schema-agnostic, p
 2. Extend to **other file types** (JSON, CSV, PDF, DOCX) using the same architecture
 3. Normalize all data into a **canonical schema** stored in PostgreSQL
 4. Provide a **REST API** for programmatic access
-5. Offer a **GUI for non-technical users** with advanced query capabilities
+5. Offer **flexible querying capabilities** through the API
 
 ---
 
@@ -249,9 +249,9 @@ Added:
                     
                               
                      
-                        GUI / WebUI   
-                       (Non-technical 
-                           users)     
+                    Web Clients / CLI Tools
+                   (React, Vue, Python scripts)
+                   (Programmatic access)
                      
 ```
 
@@ -307,7 +307,7 @@ Added:
 - [ ] Build IngestionOrchestrator
 - [ ] Implement PostgreSQL repositories
 - [ ] Create FastAPI endpoints
-- [ ] Build QueryBuilder for GUI
+- [ ] Build QueryBuilder API endpoint
 - [ ] Write comprehensive tests
 - [ ] Update documentation
 
@@ -426,7 +426,7 @@ pytest tests/test_profile_manager.py -v     # Specific test
 ### Questions to Address
 1. **Database Choice:** Confirmed PostgreSQL for flexibility and full-text search
 2. **Migration Strategy:** Gradual - new system coexists with old initially
-3. **GUI Updates:** Separate phase after API is stable
+3. **API Development:** Separate phase after core system is stable
 4. **Authentication:** To be determined based on deployment context
 
 ### Resources Created
