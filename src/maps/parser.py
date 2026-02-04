@@ -3,7 +3,7 @@
 import xml.etree.ElementTree as ET
 import re
 import pandas as pd
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Any, Optional
 import os
 
 
@@ -24,11 +24,11 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
     
-    print(f"🔍 Parsing XML file: {os.path.basename(file_path)}")
+    print(f"Parsing XML file: {os.path.basename(file_path)}")
     
     # Detect parse case first
     parse_case = detect_parse_case(file_path)
-    print(f"  📋 Parse case: {parse_case}")
+    print(f"  Parse case: {parse_case}")
     
     expected_attrs = get_expected_attributes_for_case(parse_case)
     
@@ -58,7 +58,7 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
                 header_values[field] = elem.text
             else:
                 header_values[field] = "MISSING"
-                print(f"  ⚠️  {field} expected but MISSING")
+                print(f"  Warning: {field} expected but MISSING")
     
     # Extract nodule data with characteristics
     records = []
@@ -86,7 +86,7 @@ def parse_radiology_sample(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     main_df = pd.DataFrame(records) if records else pd.DataFrame()
     unblinded_df = pd.DataFrame()  # Placeholder for now
     
-    print(f"  ✅ Parsed {len(records)} nodule records")
+    print(f"  Parsed {len(records)} nodule records")
     
     return main_df, unblinded_df
 
@@ -120,44 +120,17 @@ def extract_characteristics(nodule_elem, tag_func):
     """Extract nodule characteristic data."""
     char_data = {}
     characteristics = nodule_elem.find(tag_func('characteristics'))
-    
+
     if characteristics is not None:
-        subtlety = characteristics.find(tag_func('subtlety'))
-        if subtlety is not None and subtlety.text:
-            char_data['subtlety'] = subtlety.text
-        
-        internal_struct = characteristics.find(tag_func('internalStructure'))
-        if internal_struct is not None and internal_struct.text:
-            char_data['internalStructure'] = internal_struct.text
-        
-        calcification = characteristics.find(tag_func('calcification'))
-        if calcification is not None and calcification.text:
-            char_data['calcification'] = calcification.text
-        
-        sphericity = characteristics.find(tag_func('sphericity'))
-        if sphericity is not None and sphericity.text:
-            char_data['sphericity'] = sphericity.text
-        
-        margin = characteristics.find(tag_func('margin'))
-        if margin is not None and margin.text:
-            char_data['margin'] = margin.text
-        
-        lobulation = characteristics.find(tag_func('lobulation'))
-        if lobulation is not None and lobulation.text:
-            char_data['lobulation'] = lobulation.text
-        
-        spiculation = characteristics.find(tag_func('spiculation'))
-        if spiculation is not None and spiculation.text:
-            char_data['spiculation'] = spiculation.text
-        
-        texture = characteristics.find(tag_func('texture'))
-        if texture is not None and texture.text:
-            char_data['texture'] = texture.text
-        
-        malignancy = characteristics.find(tag_func('malignancy'))
-        if malignancy is not None and malignancy.text:
-            char_data['malignancy'] = malignancy.text
-    
+        char_fields = [
+            'subtlety', 'internalStructure', 'calcification', 'sphericity',
+            'margin', 'lobulation', 'spiculation', 'texture', 'malignancy'
+        ]
+        for field in char_fields:
+            elem = characteristics.find(tag_func(field))
+            if elem is not None and elem.text:
+                char_data[field] = elem.text
+
     return char_data
 
 
@@ -253,17 +226,25 @@ def detect_parse_case(file_path: str) -> str:
 def get_expected_attributes_for_case(parse_case: str) -> Dict[str, List[str]]:
     """
     Get expected XML attributes for a given parse case.
-    
+
     Args:
         parse_case: Parse case identifier
-        
+
     Returns:
         Dictionary mapping attribute categories to expected field lists
     """
+    # LIDC sessions share the same structure
+    lidc_session_attrs = {
+        "header": ["StudyInstanceUID", "SeriesInstanceUID", "DateService", "TimeService"],
+        "characteristics": ["subtlety"],
+        "roi": ["imageSOP_UID", "xCoord", "yCoord"],
+        "nodule": ["noduleID"]
+    }
+
     expected_attrs = {
         "Complete_Attributes": {
             "header": ["StudyInstanceUID", "SeriesInstanceUID", "Modality", "DateService", "TimeService"],
-            "characteristics": ["subtlety", "internalStructure", "calcification", "sphericity", 
+            "characteristics": ["subtlety", "internalStructure", "calcification", "sphericity",
                               "margin", "lobulation", "spiculation", "texture", "malignancy"],
             "roi": ["imageSOP_UID", "xCoord", "yCoord"],
             "nodule": ["noduleID"]
@@ -280,32 +261,9 @@ def get_expected_attributes_for_case(parse_case: str) -> Dict[str, List[str]]:
             "roi": ["imageSOP_UID"],
             "nodule": ["noduleID"]
         },
-        "LIDC_Single_Session": {
-            "header": ["StudyInstanceUID", "SeriesInstanceUID", "DateService", "TimeService"],
-            "characteristics": ["subtlety"],
-            "roi": ["imageSOP_UID", "xCoord", "yCoord"],
-            "nodule": ["noduleID"]
-        },
-        "LIDC_Multi_Session_2": {
-            "header": ["StudyInstanceUID", "SeriesInstanceUID", "DateService", "TimeService"],
-            "characteristics": ["subtlety"],
-            "roi": ["imageSOP_UID", "xCoord", "yCoord"],
-            "nodule": ["noduleID"]
-        },
-        "LIDC_Multi_Session_3": {
-            "header": ["StudyInstanceUID", "SeriesInstanceUID", "DateService", "TimeService"],
-            "characteristics": ["subtlety"],
-            "roi": ["imageSOP_UID", "xCoord", "yCoord"],
-            "nodule": ["noduleID"]
-        },
-        "LIDC_Multi_Session_4": {
-            "header": ["StudyInstanceUID", "SeriesInstanceUID", "DateService", "TimeService"],
-            "characteristics": ["subtlety"],
-            "roi": ["imageSOP_UID", "xCoord", "yCoord"],
-            "nodule": ["noduleID"]
-        }
+        "LIDC_Single_Session": lidc_session_attrs,
     }
-    
+
     # Default structure for unknown cases
     default_expected = {
         "header": ["StudyInstanceUID", "SeriesInstanceUID"],
@@ -313,7 +271,11 @@ def get_expected_attributes_for_case(parse_case: str) -> Dict[str, List[str]]:
         "roi": ["imageSOP_UID"],
         "nodule": ["noduleID"]
     }
-    
+
+    # Handle LIDC multi-session cases dynamically
+    if parse_case.startswith("LIDC_Multi_Session_"):
+        return lidc_session_attrs
+
     return expected_attrs.get(parse_case, default_expected)
 
 
@@ -336,9 +298,9 @@ def parse_multiple(files: List[str]) -> Tuple[Dict[str, pd.DataFrame], Dict[str,
             file_id = os.path.basename(file_path).split('.')[0]
             main_dfs[file_id] = main_df
             unblinded_dfs[file_id] = unblinded_df
-            print(f"✓ Successfully parsed {file_id}")
+            print(f"Successfully parsed {file_id}")
         except Exception as e:
-            print(f"✗ Error parsing {file_path}: {e}")
+            print(f"Error parsing {file_path}: {e}")
     
     return main_dfs, unblinded_dfs
 
@@ -363,7 +325,7 @@ def export_excel(df: pd.DataFrame, output_path: str) -> None:
         ws.append(r)
     
     wb.save(output_path)
-    print(f"✓ Exported to {output_path}")
+    print(f"Exported to {output_path}")
 
 
 def get_parse_statistics(main_dfs: Dict[str, pd.DataFrame]) -> Dict[str, Any]:

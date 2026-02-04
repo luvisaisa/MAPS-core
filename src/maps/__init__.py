@@ -18,7 +18,6 @@ from .parser import (
 )
 
 from .structure_detector import analyze_xml_structure
-from .gui import NYTXMLGuiApp
 
 # Schema-agnostic components
 from .schemas.canonical import (
@@ -79,7 +78,6 @@ __all__ = [
     'extract_reading_sessions',
     'get_parse_statistics',
     'analyze_xml_structure',
-    'NYTXMLGuiApp',
     # Canonical schemas
     'CanonicalDocument',
     'RadiologyCanonicalDocument',
