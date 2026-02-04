@@ -5,6 +5,23 @@ All notable changes to MAPS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-02-03
+
+### Removed
+- Tkinter GUI module (gui.py) - project now API-only
+- GUI-related documentation, tests, and examples
+- GUI launcher scripts
+
+### Changed
+- Refactored parser.py extract_characteristics() to reduce redundancy
+- Consolidated LIDC session attribute definitions
+- Updated API router imports to use relative paths
+- Migrated config to Pydantic v2 SettingsConfigDict pattern
+
+### Fixed
+- API keyword router attribute name mismatches
+- Removed emojis from parser print statements for cleaner logs
+
 ## [0.7.0] - 2025-10-27
 
 ### Added

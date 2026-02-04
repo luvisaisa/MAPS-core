@@ -10,7 +10,7 @@
 
 **MAPS (Medical Annotation Processing System)** is a comprehensive Python-based application designed to parse, analyze, and export medical imaging annotation data from various medical imaging systems and file formats. Built specifically for handling complex medical imaging session data with multiple observer readings, nodule annotations, coordinate mappings, and research literature.
 
-MAPS combines a powerful FastAPI backend with a modern React web interface, supporting **XML, JSON, PDF, and ZIP files**, providing real-time updates, advanced analytics, keyword extraction, and seamless Supabase integration for scalable data management.
+MAPS provides a powerful FastAPI REST backend supporting **XML, JSON, PDF, and ZIP files**, with advanced analytics, keyword extraction, and seamless Supabase integration for scalable data management.
 
 ## Purpose
 
@@ -266,75 +266,65 @@ occurrences = pd.read_sql(query, engine)
 ### Core Components
 
 ```
-MAPS/
- main.py                     # Application entry point
- XMLPARSE.py                 # Core GUI application and parsing engine
- radiology_database.py       # SQLite database operations and analytics
- config.py                   # Configuration management
- enhanced_logging.py         # Advanced logging system
- performance_config.py       # Performance optimization settings
+src/maps/
+├── parser.py              # Core XML parsing engine
+├── api/                   # FastAPI REST backend
+│   ├── app.py            # Application factory
+│   ├── routers/          # API endpoints
+│   └── models.py         # Pydantic models
+├── schemas/              # Canonical data schemas
+├── adapters/             # External integrations (pylidc)
+├── keyword_*.py          # Keyword extraction system
+├── auto_analysis.py      # Automatic entity extraction
+└── profile_manager.py    # Profile system
 ```
 
 ### Data Flow Architecture
 
 ```
-XML Files → Parser Engine → Data Validation → Export Engine → Output Files
-    ↓           ↓              ↓               ↓            ↓
-Multi-format  Structure    Quality Checks   Template     Excel/SQLite
-Detection     Analysis     Missing Values   Formatting   + Analytics
+Files (XML/JSON/PDF/ZIP) → Parser Engine → Canonical Schema → Export/Database
+         ↓                      ↓                ↓                 ↓
+    Format Detection      Validation      Normalization      Excel/SQLite/Supabase
 ```
 
 ## Technical Stack
 
 - **Language**: Python 3.8+
-- **GUI Framework**: Tkinter (custom-styled)
-- **Data Processing**: Pandas, NumPy
+- **API Framework**: FastAPI
+- **Data Processing**: Pandas, Pydantic v2
 - **Excel Operations**: OpenPyXL
-- **Database**: SQLite3
-- **XML Processing**: ElementTree
-- **File Operations**: Cross-platform file handling
+- **Database**: SQLite3, Supabase (PostgreSQL)
+- **XML Processing**: lxml, ElementTree
+- **PDF Processing**: pdfplumber
 
 ## Project Structure
 
-### Main Application (`main.py`)
-- Entry point for the GUI application
-- Window configuration and initialization
-- Import error handling and system compatibility checks
+### Core Library (`src/maps/`)
 
-### Core Parser (`XMLPARSE.py`)
-The heart of the application containing:
-
-#### GUI Components
-- **NYTXMLGuiApp**: Main application class
-- File/folder selection interfaces
-- Progress tracking with live updates
-- Export format selection dialogs
-- Real-time processing feedback
-
-#### Parsing Engine
+#### Parsing Engine (`parser.py`)
 - **parse_radiology_sample()**: Main XML parsing function
 - **detect_parse_case()**: Intelligent XML structure detection
 - **parse_multiple()**: Batch processing with memory optimization
-- Multi-format support (NYT, LIDC, custom formats)
+- Multi-format support (LIDC, custom formats)
 
-#### Data Processing
-- **Template transformation**: Radiologist 1-4 column format
-- **Nodule-centric organization**: Grouping by file and nodule
-- **Quality validation**: Missing value detection and reporting
-- **Memory optimization**: Batch processing for large datasets
+#### REST API (`api/`)
+- FastAPI application with modular routers
+- Endpoints for parsing, export, keywords, profiles, analysis
+- Pydantic request/response models
 
-#### Export Systems
-- **Excel Export**: Multiple format options with rich formatting
-- **SQLite Export**: Relational database with analytics capabilities
-- **Template Format**: User-defined column structure
-- **Multi-sheet organization**: Separate sheets per folder/parse case
+#### Schema System (`schemas/`)
+- **CanonicalDocument**: Schema-agnostic data normalization
+- **Profile**: Configurable parsing profiles
+- Field validation and transformation rules
 
-### Database Operations (`radiology_database.py`)
-- **RadiologyDatabase class**: SQLite wrapper with medical data focus
-- **Batch operations**: Efficient data insertion and querying
-- **Analytics engine**: Radiologist agreement analysis
-- **Quality reporting**: Data completeness and consistency checks
-- **Excel integration**: Database-to-Excel export with formatting
+#### Keyword Extraction
+- **XMLKeywordExtractor**: Medical term extraction from XML
+- **PDFKeywordExtractor**: Keyword extraction from PDFs
+- **KeywordNormalizer**: Synonym handling and normalization
+- **KeywordSearchEngine**: Full-text search capabilities
+
+#### Adapters (`adapters/`)
+- **PyLIDCAdapter**: LIDC-IDRI dataset integration
 
 ## Features
 
@@ -456,28 +446,7 @@ quality_issues  - Data quality problem tracking
 - **User Feedback**: Clear error messages and resolution suggestions
 - **Recovery Options**: Partial processing results preservation
 
-### 5. User Interface
-
-#### Main Interface
-- **Clean Design**: Aptos font, consistent color scheme (#d7e3fc)
-- **Intuitive Layout**: Logical workflow progression
-- **File Management**: Easy file/folder selection and management
-- **Export Options**: Clear choice between Excel and SQLite formats
-
-#### Progress Tracking **Enhanced Feature:**
-- **Live Progress Bars**: Visual progress indication
-- **Real-time Logging**: Timestamped activity log with color coding
-- **File-by-file Updates**: Individual file processing status
-- **Statistics Display**: Success/failure counts, processing rates
-- **Auto-close Options**: Configurable completion behavior
-
-#### Visual Feedback
-- **Color-coded Messages**: Info (blue), success (green), warning (orange), error (red)
-- **Creator Signature**: Animated signature popup on startup
-- **Status Updates**: Contextual status information
-- **Error Popups**: Temporary error notifications
-
-### 6. Performance Optimization
+### 5. Performance Optimization
 
 #### Memory Management
 - **Batch Processing**: Process files in configurable batches
@@ -491,36 +460,19 @@ quality_issues  - Data quality problem tracking
 - **Batch Database Operations**: Efficient SQLite bulk insertions
 - **Parallel Processing Ready**: Architecture supports future parallelization
 
-#### User Experience
-- **Responsive UI**: Non-blocking progress updates
-- **Background Processing**: Long operations don't freeze interface
-- **Cancellation Options**: User can interrupt long operations
-- **Resource Monitoring**: Memory and performance tracking
-
 ## Development Roadmap
 
 ### Completed Features
 
 1. **Core XML Parsing Engine** - Multi-format XML processing
-2. **GUI Application** - Complete Tkinter interface
+2. **FastAPI REST Backend** - Complete API with 8 router modules
 3. **Excel Export System** - Multiple export formats with rich formatting
 4. **SQLite Database Integration** - Relational database with analytics
-5. **Multi-Folder Processing** - Combined output generation
-6. **Template Format Export** - Radiologist 1-4 column structure
-7. **Quality Validation System** - Comprehensive data quality checks
-8. **Progress Tracking** - Real-time processing feedback
-9. **Error Handling** - Robust error management and recovery
-
-### Current Development
-
-#### Database GUI Project (In Planning)
-A separate application for database analysis and visualization:
-- **Database Browser**: Navigate and explore SQLite databases
-- **Query Interface**: Visual SQL query builder
-- **Analytics Dashboard**: Radiologist agreement analysis
-- **Data Visualization**: Charts and graphs for data insights
-- **Export Tools**: Advanced export options from database
-- **Comparison Tools**: Compare multiple databases
+5. **Supabase Integration** - Cloud PostgreSQL with full-text search
+6. **Schema-Agnostic Design** - Canonical document normalization
+7. **Keyword Extraction** - Automatic medical term extraction
+8. **Profile System** - Configurable parsing profiles
+9. **PYLIDC Adapter** - LIDC-IDRI dataset integration
 
 ### Future Enhancements
 
@@ -566,19 +518,19 @@ A separate application for database analysis and visualization:
 ```python
 # Core Dependencies
 pandas>=1.3.0
-openpyxl>=3.0.9
-numpy>=1.21.0
+openpyxl>=3.0.7
+lxml>=4.6.0
+pydantic>=2.0.0
 
-# GUI and System
-tkinter (built-in)
-platform (built-in)
-subprocess (built-in)
+# API Framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
 
-# Database
-sqlite3 (built-in)
+# PDF Processing
+pdfplumber>=0.9.0
 
-# XML Processing
-xml.etree.ElementTree (built-in)
+# Optional
+pylidc>=0.2.0  # For LIDC-IDRI integration
 ```
 
 ## Installation & Setup
@@ -587,58 +539,70 @@ xml.etree.ElementTree (built-in)
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd "XML PARSE"
+cd MAPS-core
 
 # Install dependencies
-pip install pandas openpyxl numpy
+pip install -r requirements.txt
 
-# Run the application
-python main.py
+# Run the API server
+python scripts/run_server.py
 ```
 
 ### Development Setup
 ```bash
 # Create virtual environment
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install development dependencies
 pip install -r requirements.txt
 
-# Run tests (if available)
-python -m pytest tests/
+# Run tests
+pytest -v
 
-# Start development server
-python main.py
+# Start API server
+uvicorn src.maps.api.app:create_app --factory --reload
 ```
 
 ## Usage Examples
 
-### Basic File Processing
-1. Launch application: `python main.py`
-2. Click "Select XML Files" or "Select Folders"
-3. Choose export format (Excel/SQLite/Both)
-4. Click "Export to Excel" or "Export to SQLite"
-5. Monitor progress and review results
+### Python API
+```python
+from maps import parse_radiology_sample, export_excel
 
-### Multi-Folder Processing
-1. Click "Select Folders" → "Multiple Folders"
-2. Use Cmd+Click (macOS) to select multiple folders
-3. Choose combined export format
-4. Process creates single Excel with multiple sheets
-5. Single SQLite database contains all folder data
+# Parse single file
+main_df, unblinded_df = parse_radiology_sample("sample.xml")
 
-### Template Format Export
-1. Select files/folders for processing
-2. Choose "Export to Excel"
-3. System automatically applies template format
-4. Results show Radiologist 1-4 columns with compact ratings
+# Export to Excel
+export_excel(main_df, "output.xlsx")
+```
 
-### Database Analysis
-1. Export data to SQLite format
-2. Use generated analysis Excel for quick insights
-3. Query database directly using SQL tools
-4. Future: Use Database GUI for advanced analysis
+### REST API
+```bash
+# Start server
+uvicorn src.maps.api.app:create_app --factory
+
+# Parse file via API
+curl -X POST "http://localhost:8000/parse/file" \
+  -F "file=@sample.xml"
+
+# Health check
+curl http://localhost:8000/health
+```
+
+### Batch Processing
+```python
+from maps import parse_multiple, export_excel
+import pandas as pd
+
+# Parse multiple files
+files = ["file1.xml", "file2.xml", "file3.xml"]
+main_dfs, unblinded_dfs = parse_multiple(files)
+
+# Combine and export
+combined = pd.concat(main_dfs.values(), ignore_index=True)
+export_excel(combined, "batch_results.xlsx")
+```
 
 ## Known Issues & Limitations
 
@@ -670,10 +634,10 @@ python main.py
 - Update documentation for changes
 
 ### Code Organization
-- **main.py**: Entry point only, minimal logic
-- **XMLPARSE.py**: Core functionality, well-documented
-- **radiology_database.py**: Database operations
-- **New features**: Consider separate modules for large features
+- **src/maps/parser.py**: Core parsing functionality
+- **src/maps/api/**: FastAPI routers and models
+- **src/maps/schemas/**: Pydantic data models
+- **tests/**: Test suite
 
 ### Testing
 - Test with various XML formats

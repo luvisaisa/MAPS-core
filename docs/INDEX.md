@@ -40,11 +40,6 @@ Essential documentation for developers and users:
 - [XML Keyword Extractor](XML_KEYWORD_EXTRACTOR_SUMMARY.md) - XML processing
 - [Keyword Normalization](KEYWORD_NORMALIZATION_SUMMARY.md) - Text processing
 
-### GUI Application
-- [Simplified GUI Guide](SIMPLIFIED_GUI_GUIDE.md) - GUI usage
-- [GUI Rendering Pattern](GUI_RENDERING_PATTERN.md) - Architecture
-- [GUI State Report](GUI_STATE_REPORT.md) - State management
-
 ### Schema-Agnostic System
 - [Schema-Agnostic Summary](SCHEMA_AGNOSTIC_SUMMARY.md) - Architecture overview
 - [Implementation Guide](IMPLEMENTATION_GUIDE_SCHEMA_AGNOSTIC.md) - Detailed guide
@@ -87,7 +82,6 @@ Historical documentation for reference:
 - [Bugfix: Freezing and Display](archived/bugfixes/BUGFIX_FREEZING_AND_DISPLAY.md)
 - [PDF Extraction Fix](archived/bugfixes/PDF_EXTRACTION_FIX_SUCCESS.md)
 - [Enhanced Folder Selection](archived/bugfixes/ENHANCED_FOLDER_SELECTION.md)
-- [GUI Simplification](archived/bugfixes/GUI_SIMPLIFICATION_SUMMARY.md)
 - [Text Storage Implementation](archived/bugfixes/TEXT_STORAGE_IMPLEMENTATION.md)
 
 ### Implementation Status
@@ -102,7 +96,6 @@ Historical documentation for reference:
 - Database/PostgreSQL: See "Database & Analytics" section
 - Cloud Integration: See "Supabase Integration" section
 - Text Processing: See "Keyword Extraction" section
-- User Interface: See "GUI Application" section
 - Parsing XML: See "Schema-Agnostic System" section
 
 **By Role:**

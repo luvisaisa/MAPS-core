@@ -19,25 +19,6 @@ pip install -e .
 export PYTHONPATH="${PYTHONPATH}:/path/to/MAPS-core/src"
 ```
 
-### Issue: Missing tkinter
-
-```
-ImportError: No module named '_tkinter'
-```
-
-**Solution:**
-```bash
-# Ubuntu/Debian
-sudo apt-get install python3-tk
-
-# macOS (should be included)
-# If missing, reinstall Python with homebrew
-brew install python-tk
-
-# Windows
-# Reinstall Python with tk/tcl option enabled
-```
-
 ## Parsing Issues
 
 ### Issue: Namespace errors in XML
@@ -227,19 +208,6 @@ CREATE INDEX idx_study_uid ON documents(study_instance_uid);
 
 -- Analyze query performance
 EXPLAIN ANALYZE SELECT * FROM documents WHERE study_instance_uid = '...';
-```
-
-## GUI Issues
-
-### Issue: GUI freezes during processing
-
-**Solution:**
-The GUI runs processing in a background thread. If it freezes:
-
-```python
-# Check if files are too large
-# Try processing smaller batches
-# Or use CLI instead for very large batches
 ```
 
 ## Testing Issues

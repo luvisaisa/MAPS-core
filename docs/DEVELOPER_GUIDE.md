@@ -4,60 +4,41 @@
 
 ### Code Organization
 
-The MAPS follows a modular architecture designed for maintainability and extensibility:
+MAPS follows a modular architecture designed for maintainability and extensibility:
 
 ```
 Architecture Layers:
 
-           User Interface              ← Tkinter GUI (XMLPARSE.py)
+         REST API Layer              ← FastAPI (src/maps/api/)
 
-         Business Logic               ← Parsing & Processing
+         Business Logic              ← Parsing & Processing (src/maps/)
 
-        Data Access Layer            ← Database Operations
+        Schema Layer                 ← Pydantic Models (src/maps/schemas/)
 
-         Utility Layer                ← File I/O, Validation
+         Utility Layer               ← Adapters, Extractors
 
 ```
 
-### Class Hierarchy
+### Key Modules
 
-#### NYTXMLGuiApp (Main Application Class)
+#### Parser (`src/maps/parser.py`)
 ```python
-class NYTXMLGuiApp:
-    """
-    Main GUI application class handling all user interactions and workflows
-    
-    Core Responsibilities:
-    - User interface management
-    - File/folder selection workflows
-    - Progress tracking and feedback
-    - Export format selection
-    - Error handling and user notifications
-    """
+# Core parsing functions
+parse_radiology_sample(file_path)  # Single file parsing
+parse_multiple(files)               # Batch processing
+detect_parse_case(file_path)        # XML structure detection
+export_excel(df, output_path)       # Excel export
 ```
 
-**Key Methods:**
-- `__init__(self, master)` - GUI initialization and widget setup
-- `select_files()` - Individual file selection dialog
-- `select_folders()` - Folder processing mode selection
-- `_process_multiple_folders(folders)` - **CORE FEATURE** - Multi-folder combined processing
-- `export_to_sqlite()` - Database export workflow
-- `export_new_excel()` - Excel export workflow
-- `_transform_to_template_format(data)` - **CORE FEATURE** - Template format transformation
+#### REST API (`src/maps/api/`)
+- `app.py` - FastAPI application factory
+- `routers/` - Endpoint modules (parser, keywords, profiles, etc.)
+- `models.py` - Request/response Pydantic models
+- `config.py` - API configuration
 
-#### RadiologyDatabase (Database Management)
-```python
-class RadiologyDatabase:
-    """
-    SQLite database wrapper specialized for radiology data
-    
-    Features:
-    - Relational schema for medical data
-    - Batch operations for performance
-    - Quality analysis and reporting
-    - Excel export integration
-    """
-```
+#### Schemas (`src/maps/schemas/`)
+- `canonical.py` - Schema-agnostic document models
+- `profile.py` - Parsing profile definitions
 
 ## Core Algorithms
 
